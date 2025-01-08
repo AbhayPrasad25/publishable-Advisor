@@ -1,0 +1,363 @@
+Addressing Min-Max Challenges in Nonconvex-Nonconcave Problems
+with Solutions Exhibiting Weak Minty Properties
+Abstract
+Thisresearchexaminesaspecificcategoryofstructurednonconvex-nonconcavemin-maxproblemsthatdemon-
+strateacharacteristicknownasweakMintysolutions. Thisconcept,whichhasonlyrecentlybeendefined,has
+alreadydemonstrateditseffectivenessbyencompassingvariousgeneralizationsofmonotonicityatthesametime.
+Weestablishnewconvergencefindingsforanenhancedvariantoftheoptimisticgradientmethod(OGDA)within
+thisframework,achievingaconvergencerateof1/kforthemosteffectiveiteration,measuredbythesquared
+operatornorm,aresultthatalignswiththeextragradientmethod(EG).Furthermore,weintroduceamodified
+versionofEGthatincorporatesanadaptivestepsize,eliminatingtheneedforpriorknowledgeoftheproblem’s
+specificparameters.
+1 Introduction
+Therecentadvancementsinmachinelearningmodels,particularlythosethatcanbeformulatedasmin-maxoptimizationproblems,
+havegeneratedsignificantinterestinsaddlepointproblems. Examplesofthesemodelsincludegenerativeadversarialnetworks,
+adversariallearningframeworks,adversarialexamplegames,andactor-criticmethods. Whilepracticalmethodshavebeendeveloped
+thatgenerallyperformwell,thetheoreticalunderstandingofscenarioswheretheobjectivefunctionisnonconvexintheminimization
+componentandnonconcaveinthemaximizationcomponentremainslimited,withsomeresearchevensuggestingintractabilityin
+certaincases.
+Aspecificsubsetofnonconvex-nonconcavemin-maxproblemswasanalyzed,anditwasfoundthattheextragradientmethod(EG)
+exhibitedfavorableconvergencebehaviorinexperimentalsettings. Surprisingly,theseproblemsdidnotappeartopossessanyof
+therecognizedfavorablecharacteristics,suchasmonotonicityorMintysolutions. Subsequently,asuitableconceptwasidentified
+(seeAssumption1),whichislessrestrictivethanthepresenceofaMintysolution(aconditionfrequentlyemployedintheexisting
+literature)andalsoextendstheideaofnegativecomonotonicity. Becauseofthesepropertiesthatunifyandgeneralize,theconceptof
+weakMintysolutionswasquicklyinvestigated.
+Assumption1(WeakMintysolution). ForagivenoperatorF :Rd →Rd,thereisapointu∗ ∈Rdandaparameterρ>0suchthat:
+ρ
+⟨F(u),u−u∗⟩≥− ∥F(u)∥2 ∀u∈Rd. (1)
+2
+Moreover,ithasbeendemonstratedthatamodifiedversionofEGiscapableofaddressingproblemswithsuchsolutions,achieving
+acomplexityofO(ϵ−1)forthesquaredoperatornorm. Thisadaptation,referredtoasEG+,isbasedonaboldextrapolationstep
+followedbyacautiousupdatestep. Asimilarstepsizeapproachhasbeenpreviouslyexaminedinthecontextofastochasticvariant
+ofEG.
+In a similar vein, we explore a variation of the optimistic gradient descent ascent (OGDA), also known as Forward-Reflected-
+Backward(FoRB).Weaddressthefollowingquestionwithanaffirmativeanswer:
+CanOGDAachieveconvergenceguaranteescomparabletothoseofEGwhendealingwithweakMintysolutions?
+Specifically,wedemonstratethatamodifiedversionoftheOGDAmethod,definedforastepsizea>0andaparameter0<γ ≤1
+asfollows:
+u =u¯ −aF(u¯ ),
+k k k
+u¯ =u¯ −γaF(u ), ∀k ≥0,
+k+1 k k
+canachievethesameconvergenceboundsasEG+byrequiringonlyasinglegradientoraclecallineachiteration.
+ItisworthnotingthatOGDAismostfrequentlyexpressedinaformwhereγ = 1. However,tworecentstudieshaveexamined
+amoregeneralizedcoefficient. Whiletheseearlierstudiesfocusedonthemonotonesetting,thetruesignificanceofγ becomesapparentonlywhendealingwithweakMintysolutions. Inthiscontext,wefindthatγ mustbegreaterthan1toensureconvergence,
+aphenomenonthatisnotobservedinmonotoneproblems.
+Whenexaminingageneralsmoothmin-maxproblem:
+minmaxf(x,y)
+x y
+theoperatorF mentionedinAssumption1naturallyemergesasF(u) := [∇ f(x,y),−∇ f(x,y)]withu = (x,y). However,
+x y
+byexaminingsaddlepointproblemsfromthebroaderviewpointofvariationalinequalities(VIs)throughtheoperatorF,wecan
+concurrentlyaddressmorescenarios,suchascertainequilibriumproblems.
+TheparameterρinthedefinitionofweakMintysolutions(1)iscrucialforboththeanalysisandtheexperiments. Specifically,it
+isessentialthatthestepsizeexceedsavalueproportionaltoρ. Simultaneously,asistypical,thestepsizeislimitedfromabove
+bytheinverseoftheLipschitzconstantofF. Forinstance,sincesomeresearchersrequirethestepsizetobelessthan 1 ,their
+4L
+convergenceclaimisvalidonlyifρ < 1 . Thisconditionwaslaterimprovedtoρ < 1 forthechoiceγ = 1andtoρ < 1 for
+4L 2L L
+evensmallervaluesofγ. Asinthemonotonesetting,OGDArequiresasmallerstepsizethanEG.Nevertheless,throughadifferent
+analysis,weareabletomatchthemostgeneralconditionontheweakMintyparameterρ< 1 forappropriateγ anda.
+L
+1.1 Contribution
+Ourcontributionsaresummarizedasfollows:
+1. WeestablishanewconvergencerateofO(1/k),measuredbythesquaredoperatornorm,foramodifiedversionofOGDA,
+whichwecallOGDA+. ThisratematchesthatofEGandbuildsupontherecentlyintroducedconceptofweaksolutionsto
+theMintyvariationalinequality.
+2. Evenwhenastrongerconditionisimposed,specificallythattheoperatorisalsomonotone,weenhancetherangeoffeasible
+stepsizesforOGDA+andobtainthemostfavorableresultknownforthestandardmethod(γ =1).
+3. WedemonstrateacomplexityboundofO(ϵ−2)forastochasticvariantoftheOGDA+method.
+4. WealsointroduceanadaptivestepsizeversionofEG+. Thisversionachievesthesameconvergenceguaranteeswithout
+requiringanyknowledgeoftheLipschitzconstantoftheoperatorF. Consequently,itcanpotentiallytakelargerstepsin
+areaswithlowcurvature,enablingconvergencewhereafixedstepsizestrategymightfail.
+1.2 Relatedliterature
+Wewillconcentrateonthenonconvex-nonconcavesetting,asthereisasubstantialbodyofworkonconvergenceratesintermsofagap
+functionordistancetoasolutionformonotoneproblems,aswellasgeneralizationssuchasnonconvex-concave,convex-nonconcave,
+orunderthePolyak-Łojasiewiczassumption.
+WeakMinty. ItwasobservedthataspecificparameterizationofthevonNeumannratiogameexhibitsanoveltypeofsolution,
+termed"weakMinty,"withouthavinganyofthepreviouslyknowncharacteristicslike(negative)comonotonicityorMintysolutions.
+ConvergenceinthepresenceofsuchsolutionswasdemonstratedforEG,providedthattheextrapolationstepsizeistwiceaslargeas
+theupdatestep. Subsequently,itwasshownthattheconditionontheweakMintyparametercanberelaxedbyfurtherreducingthe
+lengthoftheupdatestep,andthisisdoneadaptively. Toavoidtheneedforadditionalhyperparameters,abacktrackinglinesearchis
+alsoproposed,whichmayincurextragradientcomputationsorrequiresecond-orderinformation(incontrasttotheadaptivestep
+sizeweproposeinAlgorithm3). Adifferentapproachistakenbyfocusingonthemin-maxsettingandusingmultipleascentsteps
+perdescentstep,achievingthesameO(1/k)rateasEG.
+Mintysolutions. NumerousstudieshavepresentedvariousmethodsforscenarioswheretheproblemathandhasaMintysolution.
+ItwasshownthatweaklymonotoneVIscanbesolvedbyiterativelyaddingaquadraticproximitytermandrepeatedlyoptimizing
+theresultingstronglymonotoneVIusinganyconvergentmethod. TheconvergenceoftheOGDAmethodwasproven,butwithouta
+specificrate. Itwasnotedthattheconvergenceproofforthegoldenratioalgorithm(GRAAL)isvalidwithoutanychanges. While
+theassumptionthataMintysolutionexistsisageneralizationofthemonotonesetting, itischallengingtofindnon-monotone
+problemsthatpossesssuchsolutions. Inoursetting,asperAssumption1,theMintyinequality(MVI)canbeviolatedatanypoint
+byafactorproportionaltothesquaredoperatornorm.
+Negativecomonotonicity. Althoughpreviouslystudiedundertheterm"cohypomonotonicity,"theconceptofnegativecomono-
+tonicityhasrecentlybeenexplored. Itoffersageneralizationofmonotonicity,butinadirectiondistinctfromtheconceptofMinty
+solutions,andonlyalimitednumberofstudieshaveexaminedmethodsinthiscontext. AnanchoredversionofEGwasstudied,and
+animprovedconvergencerateofO(1/k2)(intermsofthesquaredoperatornorm)wasshown. Similarly,anacceleratedversionof
+thereflectedgradientmethodwasinvestigated. WhethersuchaccelerationispossibleinthemoregeneralsettingofweakMinty
+solutionsremainsanopenquestion(anyStampacchiasolutiontotheVIgivenbyanegativelycomonotoneoperatorisaweakMinty
+solution). Anotherintriguingobservationwasmade,whereforcohypomonotoneproblems,amonotonicallydecreasinggradient
+normwasdemonstratedwhenusingEG.However,wedidnotobservethisinourexperiments,emphasizingtheneedtodifferentiate
+thisclassfromproblemswithweakMintysolutions.
+2Interactiondominance. Theconceptofα-interactiondominancefornonconvex-nonconcavemin-maxproblemswasinvestigated,
+anditwasshownthattheproximal-pointmethodconvergessublinearlyifthisconditionismetinyandlinearlyifitismetinboth
+components. Furthermore,itwasdemonstratedthatifaproblemisinteractiondominantinbothcomponents,itisalsonegatively
+comonotone.
+Optimism. Thepositiveeffectsofintroducingthesimplemodificationcommonlyknownasoptimismhaverecentlyattractedthe
+attentionofthemachinelearningcommunity. Itsnamecomesfromonlineoptimization. Theideadatesbackevenfurtherandhas
+alsobeenstudiedinthemathematicalprogrammingcommunity.
+2 Preliminaries
+2.1 Notionsofsolution
+We outline the most frequently used solution concepts in the context of variational inequalities (VIs) and related areas. These
+conceptsaretypicallydefinedwithrespecttoaconstraintsetC ⊆Rd. AStampacchiasolutionoftheVIgivenbyF :Rd →Rdisa
+pointu∗suchthat:
+⟨F(u∗),u−u∗⟩≥0 ∀u∈C. (SVI)
+Inthiswork,weonlyconsidertheunconstrainedcasewhereC =Rd,andtheaboveconditionsimplifiestoF(u∗)=0. Closely
+relatedisthefollowingconcept: AMintysolutionisapointu∗ ∈C suchthat:
+⟨F(u),u−u∗⟩≥0 ∀u∈C. (MVI)
+ForacontinuousoperatorF,aMintysolutionoftheVIisalwaysaStampacchiasolution. Theconverseisgenerallynottruebut
+holds,forexample,iftheoperatorF ismonotone. Specifically,therearenonmonotoneproblemswithStampacchiasolutionsbut
+withoutanyMintysolutions.
+2.2 Notionsofmonotonicity
+Thissectionaimstorevisitsomefundamentalandmorecontemporaryconceptsofmonotonicityandtherelationshipsbetweenthem.
+AnoperatorF isconsideredmonotoneif:
+⟨F(u)−F(v),u−v⟩≥0.
+Suchoperatorsnaturallyariseasthegradientsofconvexfunctions,fromconvex-concavemin-maxproblems,orfromequilibrium
+problems.
+Twofrequentlystudiednotionsthatfallintothiscategoryarestronglymonotoneoperators,whichsatisfy:
+⟨F(u)−F(v),u−v⟩≥µ∥u−v∥2,
+andcocoerciveoperators,whichfulfill:
+⟨F(u)−F(v),u−v⟩≥β∥F(u)−F(v)∥2. (2)
+Stronglymonotoneoperatorsemergeasgradientsofstronglyconvexfunctionsorinstrongly-convex-strongly-concavemin-max
+problems. Cocoerciveoperatorsappear,forinstance,asgradientsofsmoothconvexfunctions,inwhichcase(2)holdswithβ equal
+totheinverseofthegradient’sLipschitzconstant.
+Departingfrommonotonicity. Bothoftheaforementionedsubclassesofmonotonicitycanserveasstartingpointsforexploring
+thenon-monotonedomain. Giventhatgeneralnon-monotoneoperatorsmaydisplayerraticbehavior,suchasperiodiccyclesand
+spuriousattractors,itisreasonabletoseeksettingsthatextendthemonotoneframeworkwhileremainingmanageable. Firstand
+foremostistheextensivelystudiedsettingofν-weakmonotonicity:
+⟨F(u)−F(v),u−v⟩≥−ν∥u−v∥2.
+Suchoperatorsariseasthegradientsofthewell-studiedclassofweaklyconvexfunctions,arathergeneralclassoffunctionsasit
+includesallfunctionswithoutupwardcusps. Inparticular,everysmoothfunctionwithaLipschitzgradientturnsouttofulfillthis
+property.Ontheotherhand,extendingthenotionofcocoercivitytoallowfornegativecoefficients,referredtoascohypomonotonicity,
+hasreceivedmuchlessattentionandisgivenby:
+⟨F(u)−F(v),u−v⟩≥−γ∥F(u)−F(v)∥2.
+Clearly,ifaStampacchiasolutionexistsforsuchanoperator,thenitalsofulfillsAssumption1.
+Behaviorwithrespecttothesolution. Whiletheabovepropertiesarestandardassumptionsintheliterature,itisusuallysufficient
+torequirethecorrespondingconditiontoholdwhenoneoftheargumentsisa(Stampacchia)solution. Thismeansthatinsteadof
+monotonicity,itisenoughtoaskfortheoperatorF tobestar-monotone,i.e.,
+⟨F(u),u−u∗⟩≥0,
+orstar-cocoercive,
+⟨F(u),u−u∗⟩≥γ∥F(u)∥2.
+Inthisspirit,wecanprovideanewinterpretationtotheassumptionoftheexistenceofaweakMintysolutionasaskingforthe
+operatorF tobenegativelystar-cocoercive(withrespecttoatleastonesolution). Furthermore,wewanttopointoutthatwhilethe
+abovestarnotionsaresometimesrequiredtoholdforallsolutionsu∗,inthefollowingweonlyrequireittoholdforasinglesolution.
+33 OGDAforproblemswithweakMintysolutions
+ThegeneralizedversionofOGDA,whichwedenotewitha"+"toemphasizethepresenceoftheadditionalparameterγ,isgivenby:
+Algorithm1OGDA+
+Require: Startingpointu =u ∈Rd,stepsizea>0andparameter0<γ <1.
+0 −1
+fork =0,1,...do
+u =u −a((1+γ)F(u )−F(u ))
+k+1 k k k−1
+endfor
+Theorem3.1. LetF :Rd →RdbeL-LipschitzcontinuoussatisfyingAssumption1with 1 >ρ,andlet(u ) betheiterates
+L k k≥0
+generatedbyAlgorithm1withstepsizeasatisfyinga>ρand
+1−γ
+aL≤ . (3)
+1+γ
+Then,forallk ≥0,
+1
+min ∥F(u )∥2 ≤ ∥u +aF(u )−u∗∥2.
+i=0,...,k−1 i kaγ(a−ρ) 0 0
+Inparticular,aslongasρ< 1,wecanfindaγ smallenoughsuchthattheaboveboundholds.
+L
+Thefirstobservationisthatwewouldliketochooseaaslargeaspossible,asthisallowsustotreatthelargestclassofproblems
+withρ<a. Tobeabletochoosealargestepsizea,wemustdecreaseγ,asevidentfrom(3). However,thisdegradesthealgorithm’s
+speedbymakingtheupdatestepssmaller. ThesameeffectcanbeobservedforEG+andisthereforenotsurprising. Onecould
+deriveanoptimalγ (i.e.,minimizingtheright-handside)fromTheorem3.1,butthisresultsinanon-intuitivecubicdependenceon
+ρ. Inpractice,thestrategyofdecreasingγ untilconvergenceisachieved,butnotfurther,yieldsreasonableresults.
+Furthermore,wewanttopointoutthattheconditionρ< 1 ispreciselythebestpossibleboundforEG+.
+L
+3.1 Improvedboundsundermonotonicity
+WhiletheabovetheoremalsoholdsiftheoperatorF ismonotone,wecanmodifytheproofslightlytoobtainabetterdependenceon
+theparameters:
+Theorem3.2. LetF :Rd →RdbemonotoneandL-Lipschitz. IfaL= 2−γ −ϵforϵ>0,thentheiteratesgeneratedbyOGDA+
+2+γ
+fulfill
+2
+min ∥F(u )∥2 ≤ ∥u +aF(u )−u∗∥2.
+i=0,...,k−1 i ka2γ2ϵ 0 0
+Inparticular,wecanchooseγ =1anda< 1 .
+2L
+TherearedifferentworksdiscussingtheconvergenceofOGDAintermsoftheiteratesoragapfunctionwitha< 1 . However,we
+2L
+wanttocomparetheaboveboundtomoresimilarresultsonratesforthebestiterateintermsoftheoperatornorm. Thesamerateas
+oursforOGDAisshown,butrequirestheconservativestepsizebounda≤ 1 . Thiswaslaterimprovedtoa≤ 1 . Allofthese
+16L 3L
+onlydealwiththecaseγ =1. Theonlyotherreferencethatdealswithageneralized(i.e.,notnecessarilyγ =1)versionofOGDA
+isanotherwork,wheretheresultingstepsizeconditionisa≤ 2−γ,whichisstrictlyworsethanoursforanyγ. Tosummarize,not
+4L
+onlydoweshowforthefirsttimethatthestepsizeofageneralizationofOGDAcangoabove 1 ,butwealsoprovidetheleast
+2L
+restrictiveboundforanyvalueofγ.
+3.2 OGDA+stochastic
+Inthissection,wediscussthesettingwhere,insteadoftheexactoperatorF,weonlyhaveaccesstoacollectionofindependent
+estimatorsF(·,ξ )ateveryiteration. WeassumeherethattheestimatorF isunbiased,i.e.,E[F(u ,ξ)|u ]=F(u ),andhas
+i k k−1 k
+boundedvarianceE[∥F(u ,ξ)−F(u )∥2]≤σ2. WeshowthatwecanstillguaranteeconvergencebyusingbatchsizesBoforder
+k k
+O(ϵ−1).
+Algorithm2stochasticOGDA+
+Require: Startingpointu =u ∈Rd,stepsizea>0,parameter0<γ ≤1andbatchsizeB.
+0 −1
+fork =0,1,...do
+Samplei.i.d. (ξ )B andcomputeestimatorg˜ = 1 (cid:80)B F(u ,ξk)
+i i=1 k B i=1 k i
+u =u −a((1+γ)g˜ −g˜ )
+k+1 k k k−1
+endfor
+4Theorem 3.3. Let F : Rd → Rd be L-Lipschitz satisfying Assumption 1 with 1 > ρ, and let (u ) be the sequence of
+L k k≥0
+iteratesgeneratedbystochasticOGDA+,withaandγ satisfyingρ < a < 1−γ 1. Then,tovisitanϵ-stationarypointsuchthat
+1+γL
+min E[∥F(u )∥2]<ϵ,werequire
+i=0,...,k−1 i
+1
+(cid:26) 4σ2(cid:27)
+∥u +ag˜ −u∗∥2max 1,
+kaγ(a−ρ) 0 0 aLϵ
+callstothestochasticoracleF˜,withlargebatchsizesoforderO(ϵ−1).
+Inpractice,largebatchsizesoforderO(ϵ−1)aretypicallynotdesirable;instead,asmallordecreasingstepsizeispreferred. Inthe
+weakMintysetting,thiscausesadditionaltroubleduetothenecessityoflargestepsizestoguaranteeconvergence. Unfortunately,
+thecurrentanalysisdoesnotallowforvariableγ.
+4 EG+withadaptivestepsizes
+Inthissection,wepresentAlgorithm3,whichisabletosolvethepreviouslymentionedproblemswithoutanyknowledgeofthe
+LipschitzconstantL,asitistypicallydifficulttocomputeinpractice. Additionally,itiswellknownthatroughestimateswillleadto
+smallstepsizesandslowconvergencebehavior. However,inthepresenceofweakMintysolutions,thereisadditionalinterestin
+choosinglargestepsizes. WeobservedinTheorem3.1andrelatedworksthefactthatacrucialingredientintheanalysisisthatthe
+stepsizeischosenlargerthanamultipleoftheweakMintyparameterρtoguaranteeconvergenceatall. Forthesereasons,wewant
+tooutlineamethodusingadaptivestepsizes,meaningthatnostepsizeneedstobesuppliedbytheuserandnoline-searchiscarried
+out.
+SincetheanalysisofOGDA+isalreadyquiteinvolvedintheconstantstepsizeregime,wechoosetoequipEG+withanadaptive
+stepsizewhichestimatestheinverseofthe(local)Lipschitzconstant,see(4). Duetothefactthattheliteratureonadaptivemethods,
+especiallyinthecontextofVIs,issovast,wedonotaimtogiveacomprehensivereviewbuthighlightonlyafewwithespecially
+interestingproperties. Inparticular,wedonotwanttotouchonmethodswithalinesearchprocedure,whichtypicallyresultin
+multiplegradientcomputationsperiteration.
+WeuseasimpleandthereforewidelyusedstepsizechoicethatnaivelyestimatesthelocalLipschitzconstantandforcesamonotone
+decreasingbehavior. SuchstepsizeshavebeenusedextensivelyformonotoneVIsandsimilarlyinthecontextofthemirror-prox
+method,whichcorrespondstoEGinthesettingof(non-Euclidean)Bregmandistances.
+AversionofEGwithadifferentadaptivestepsizechoicehasbeeninvestigated,withtheuniquefeaturethatitisabletoachievethe
+optimalratesforbothsmoothandnonsmoothproblemswithoutmodification. However,theseratesareonlyformonotoneVIsand
+areintermsofthegapfunction.
+Oneofthedrawbacksofadaptivemethodsresidesinthefactthatthestepsizesaretypicallyrequiredtobenonincreasing,which
+resultsinpoorbehaviorifahigh-curvatureareawasvisitedbytheiteratesbeforereachingalow-curvatureregion. Tothebestofour
+knowledge,theonlymethodthatisallowedtousenonmonotonestepsizestotreatVIsanddoesnotuseapossiblycostlylinesearch
+isthegoldenratioalgorithm. ItcomeswiththeadditionalbenefitofnotrequiringaglobalboundontheLipschitzconstantofF at
+all. WhileitisknownthatthismethodconvergesunderthestrongerassumptionoftheexistenceofMintysolutions,aquantitative
+convergenceresultisstillopen.
+Algorithm3EG+withadaptivestepsize
+Require: Startingpointsu ,u¯ ∈Rd,initialstepsizea andparametersτ ∈(0,1)and0<γ ≤1.
+0 0 0
+fork =0,1,...do
+Findthestepsize:
+(cid:26) (cid:27)
+τ∥u¯ −u¯ ∥
+a =min a , k k−1 (4)
+k k−1 ∥F(u¯ )−F(u¯ )∥
+k k−1
+Computenextiterate:
+u =u¯ −a F(u¯ )
+k k k k
+u¯ =u¯ −a γF(u ).
+k+1 k k k
+endfor
+Clearly,a ismonotonicallydecreasingbyconstruction. Moreover,itisboundedawayfromzerobythesimpleobservationthat
+k
+a ≥min{a ,τ/L}>0. Thesequencethereforeconvergestoapositivenumber,whichwedenotebya :=lim a .
+k 0 ∞ k k
+Theorem4.1. LetF : Rd → Rd beL-LipschitzthatsatisfiesAssumption1,whereu∗ denotesanyweakMintysolution,with
+a >2ρ,andlet(u ) betheiteratesgeneratedbyAlgorithm3withγ = 1 andτ ∈(0,1). Then,thereexistsak ∈Nsuchthat
+∞ k k≥0 2 0
+1 L
+min ∥F(u )∥2 ≤ ∥u¯ −u∗∥2.
+i=k0,...,k k k−k 0τ(a ∞/2−ρ) k0
+5Algorithm3presentedaboveprovidesseveralbenefitsbutalsosomedrawbacks. Themainadvantageresidesinthefactthatthe
+LipschitzconstantoftheoperatorF doesnotneedtobeknown. Moreover,thestepsizechoicepresentedin(4)mightallowus
+totakestepsmuchlargerthanwhatwouldbesuggestedbyaglobalLipschitzconstantiftheiteratesnever,oronlyduringlater
+iterations,visittheregionofhighcurvature(largelocalL). Insuchcases,theselargerstepsizescomewiththeadditionaladvantage
+thattheyallowustosolvearicherclassofproblems,asweareabletorelaxtheconditionρ< 1 inthecaseofEG+toρ<a /2,
+4L ∞
+wherea =lim a ≥τ/L.
+∞ k k
+Ontheotherhand,wefacetheproblemthattheboundsinTheorem4.1onlyholdafteranunknownnumberofinitialiterationswhen
+a /a ≤ 1 isfinallysatisfied. Intheory,thismighttakealongtimeifthecurvaturearoundthesolutionismuchhigherthanin
+k k+1 τ
+thestartingarea,asthiswillforcetheneedtodecreasethestepsizeverylateintothesolutionprocess,resultinginthequotient
+a /a beingtoolarge. Thisdrawbackcouldbemitigatedbychoosingτ smaller. However,thiswillresultinpoorperformance
+k k+1
+duetosmallstepsizes. Evenformonotoneproblemswherethistypeofstepsizehasbeenproposed,thisproblemcouldnotbe
+circumvented,andauthorsinsteadfocusedontheconvergenceoftheiterateswithoutanyrate.
+5 Numericalexperiments
+Inthefollowing,wecomparetheEG+methodwiththetwomethodswepropose: OGDA+andEG+withadaptivestepsize(see
+Algorithm1andAlgorithm3,respectively). Lastbutnotleast,wealsoincludetheCurvatureEG+method,whichisamodification
+ofEG+thatadaptivelychoosestheratioofextrapolationandupdatesteps. Inaddition,abacktrackinglinesearchisperformedwith
+aninitialguessmadebysecond-orderinformation,whoseextracostweignoreintheexperiments.
+5.1 VonNeumann’sratiogame
+WeconsidervonNeumann’sratiogame,whichisgivenby:
+⟨x,Ry⟩
+min maxV(x,y)= , (5)
+x∈∆my∈∆n ⟨x,Sy⟩
+whereR∈Rm×nandS ∈Rm×nwith⟨x,Sy⟩>0forallx∈∆ ,y ∈∆ ,with∆:={z ∈Rd :z >0,(cid:80)d z =1}denoting
+m n i i=1 i
+theunitsimplex. Expression(5)canbeinterpretedasthevalueV(x,y)forastochasticgamewithasinglestateandmixedstrategies.
+Weseeanillustrationofaparticularlydifficultinstanceof(5). Interestingly,westillobservegoodconvergencebehavior,although
+anestimatedρismorethantentimeslargerthantheestimatedLipschitzconstant.
+5.2 Forsaken
+Aparticularlydifficultmin-maxtoyexamplewitha"Forsaken"solutionwasproposedandisgivenby:
+minmaxx(y−0.45)+ϕ(x)−ϕ(y), (6)
+x∈R y∈R
+whereϕ(z)= 1z6− 2z4+ 1z2− 1z. ThisproblemexhibitsaStampacchiasolutionat(x∗,y∗)≈(0.08,0.4),butalsotwolimit
+6 4 4 2
+cyclesnotcontaininganycriticalpointoftheobjectivefunction. Inaddition,itwasalsoobservedthatthelimitcyclecloserto
+thesolutionrepelspossibletrajectoriesofiterates,thus"shielding"thesolution. Later,itwasnoticedthat,restrictedtothebox
+∥(x,y)∥ <3,theabove-mentionedsolutionisweakMintywithρ≥2·0.477761,whichismuchlargerthan 1 ≈0.08. Inline
+∞ 2L
+withtheseobservations,wecanseethatnoneofthefixedstepsizemethodswithastepsizeboundedby 1 converge. Inlightofthis
+L
+observation,abacktrackinglinesearchwasproposed,whichpotentiallyallowsforlargerstepsthanpredictedbytheglobalLipschitz
+constant. Similarly,ourproposedadaptivestepsizeversionofEG+(seeAlgorithm3)isalsoabletobreakthroughtherepelling
+limitcycleandconvergetothesolution. Ontopofthis,itdoessoatafasterrateandwithouttheneedforadditionalcomputationsin
+thebacktrackingprocedure.
+5.3 Lowerboundexample
+Thefollowingmin-maxproblemwasintroducedasalowerboundonthedependencebetweenρandLforEG+:
+ζ
+minmaxµxy+ (x2−y2). (7)
+x∈R y∈R 2
+Inparticular,itwasstatedthatEG+(withanyγ)andconstantstepsizea= 1 convergesforthisproblemifandonlyif(0,0)isa
+L
+weakMintysolutionwithρ< 1−γ,whereρandLcanbecomputedexplicitlyintheaboveexampleandaregivenby:
+L
+(cid:112) µ2−ζ2
+L= µ2+ζ2 and ρ= .
+2µ
+Bychoosingµ=3andζ =−1,wegetexactlyρ= 1,thereforepredictingdivergenceofEG+foranyγ,whichisexactlywhatis
+L
+empiricallyobserved. AlthoughthegeneralupperboundprovedinTheorem3.1onlystatesconvergenceinthecaseρ < 1,we
+L
+observerapidconvergenceofOGDA+forthisexample,showcasingthatitcandrasticallyoutperformEG+insomescenarios.
+66 Conclusion
+Many intriguing questions persist in the domain of min-max problems, particularly when departing from the convex-concave
+framework. Veryrecently,itwasdemonstratedthattheO(1/k)boundsonthesquaredoperatornormforEGandOGDAforthe
+lastiterate(andnotjustthebestone)arevalideveninthenegativelycomonotonesetting. Derivingacomparablestatementinthe
+presenceofmerelyweakMintysolutionsremainsanopenquestion.
+Ingeneral,ouranalysisandexperimentsseemtosuggestthatthereisminimalbenefitinemployingOGDA+overEG+forthe
+majorityofproblems,asthereducediterationcostiscounterbalancedbythesmallerstepsize. Anexceptionispresentedbyproblem
+(7),whichisnotcoveredbytheory,andOGDA+istheonlymethodcapableofconverging.
+Finally,wenotethatthepreviousparadigminpureminimizationof"smallerstepsizeensuresconvergence"but"largerstepsize
+getstherefaster,"wherethelatteristypicallyconstrainedbythereciprocalofthegradient’sLipschitzconstant,doesnotappear
+toholdtrueformin-maxproblemsanymore. TheanalysisofvariousmethodsinthepresenceofweakMintysolutionsindicates
+thatconvergencecanbelostifthestepsizeisexcessivelysmallandsometimesneedstobelargerthan 1,whichonecantypically
+L
+onlyhopeforinadaptivemethods. OurEG+methodwithadaptivestepsizeaccomplishesthisevenwithouttheaddedexpenseofa
+backtrackinglinesearch.articlegraphicx
+7

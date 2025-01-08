@@ -1,0 +1,318 @@
+Safe Predictors for Input-Output Specification
+Enforcement
+Abstract
+Thispaperpresentsanapproachfordesigningneuralnetworks,alongwithother
+machinelearningmodels,whichadheretoacollectionofinput-outputspecifica-
+tions. Ourmethodinvolvestheconstructionofaconstrainedpredictorforeachset
+ofcompatibleconstraints,andcombiningthesepredictorsinasafemannerusinga
+convexcombinationoftheirpredictions. Wedemonstratetheapplicabilityofthis
+methodwithsyntheticdatasetsandonanaircraftcollisionavoidanceproblem.
+1 Introduction
+The increasing adoption of machine learning models, such as neural networks, in safety-critical
+applications, such as autonomous vehicles and aircraft collision avoidance, highlights an urgent
+needforthedevelopmentofguaranteesonsafetyandrobustness. Thesemodelsmayberequired
+tosatisfyspecificinput-outputspecificationstoensurethealgorithmscomplywithphysicallaws,
+canbeexecutedsafely,andareconsistentwithpriordomainknowledge. Furthermore,thesemodels
+shoulddemonstrateadversarialrobustness,meaningtheiroutputsshouldnotchangeabruptlywithin
+smallinputregions–apropertythatneuralnetworksoftenfailtosatisfy.
+Recentstudieshaveshownthecapacitytoverifyformallyinput-outputspecificationsandadversarial
+robustnesspropertiesofneuralnetworks. Forinstance,theSatisabilityModuloTheory(SMT)solver
+ReluplexwasemployedtoverifypropertiesofnetworksbeingusedintheNext-GenerationAircraft
+CollisionAvoidanceSystemforUnmannedaircraft(ACASXu). Reluplexhasalsobeenusedto
+verifyadversarialrobustness. WhileReluplexandothersimilartechniquescaneffectivelydetermine
+ifanetworksatisfiesagivenspecification,theydonotofferawaytoguaranteethatthenetworkwill
+meetthosespecifications. Therefore,additionalmethodsareneededtoadjustnetworksifitisfound
+thattheyarenotmeetingthedesiredproperties.
+Therehasbeenanincreaseintechniquesfordesigningnetworkswithcertifiedadversarialrobustness,
+butenforcingmoregeneralsafetypropertiesinneuralnetworksisstilllargelyunexplored. Oneap-
+proachtoachievingprovablycorrectneuralnetworksisthroughabstraction-refinementoptimization.
+ThisapproachhasbeenappliedtotheACAS-Xudataset,butthenetworkwasnotguaranteedtomeet
+thespecificationsuntilaftertraining. Ourworkseekstodesignnetworkswithenforcedinput-output
+constraintsevenbeforetraininghasbeencompleted. Thiswillallowforonlinelearningscenarios
+whereasystemhastoguaranteesafetythroughoutitsoperation.
+This paper presents an approach for designing a safe predictor (a neural network or any other
+machinelearningmodel)thatwillalwaysmeetasetofconstraintsontheinput-outputrelationship.
+This assumes that the constrained output regions can be formulated to be convex. Our correct-
+by-constructionsafepredictorisguaranteedtosatisfytheconstraints,evenbeforetraining,andat
+everytrainingstep. WedescribeourapproachinSection2,andshowitsuseinanaircraftcollision
+avoidanceprobleminSection3. ResultsonsyntheticdatasetscanbefoundinAppendixB.
+.2 Method
+Consideringtwonormedvectorspaces,aninputspaceXandanoutputspaceY,andacollection
+ofcdifferentpairsofinput-outputconstraints,(A ,B ),whereA ⊆X andB isaconvexsubset
+i i i i
+of Y for each constraint i, the goal is to design a safe predictor, F : X → Y, that guarantees
+x∈A ⇒F(x)∈B .
+i i
+Letbbeabit-stringoflengthc. DefineO asthesetofpointszsuchthat,foralli,b =1implies
+b i
+z ∈A ,andb =0impliesz ∈/ A . O thusrepresentstheoverlapregionsforeachcombinationof
+i i i b
+inputconstraints. Forexample,O isthesetofpointsinA andA ,butnotinA ,andO is
+101 1 3 2 0...0
+thesetwherenoinputconstraintsapply. WealsodefineOasthesetofbitstrings,b,suchthatO
+b
+isnon-empty,anddefinek = |O|. Thesets{O : b ∈ O}createapartitionofX accordingtothe
+b
+combinationofinputconstraintsthatapply.
+Given:
+• cdifferentinputconstraintproximityfunctions,σ :X →[0,1],whereσ iscontinuousand
+i i
+∀x∈A ,σ (x)=0,
+i i
+• kdifferentconstrainedpredictors,G :X →B ,oneforeachb∈O,suchthatthedomain
+b b
+ofeachG isnon-empty,
+b
+Wedefine:
+• a (cid:80)set of weighting functions, w b(x) =
+(cid:80)
+b∈(cid:81) Oi: (cid:81)bi= i:1 bi( =1− 1(σ 1i −(x σ) i) (x(cid:81) ))i: (cid:81)bi= i:0 biσ =i 0(x σ) i(x), where
+w (x)=1,and
+b∈O b
+(cid:80)
+• asafepredictor,F(x)= w (x)G (x).
+b∈O b b
+Theorem2.1. Foralli,ifx∈A ,thenF(x)∈B .
+i i
+AformalproofofTheorem2.1ispresentedinAppendixAandcanbesummarizedas: ifaninputis
+inA ,thenbyconstructionoftheproximityandweightingfunctions,alloftheconstrainedpredictors,
+i
+G ,thatdonotmaptoB willbegivenzeroweight. Onlytheconstrainedpredictorsthatmapto
+b i
+B willbegivennon-zeroweight,andbecauseoftheconvexityofB ,theweightedaverageofthe
+i i
+predictionswillremaininB .
+i
+If all G are continuous and if there are no two input sets, A and A , for which (A ∩A ) ⊂
+b i j i j
+(∂A ∪∂A ),thenF willbecontinuous.Intheworstcase,asthenumberofconstraintsgrowslinearly,
+i j
+thenumberofconstrainedpredictorsneededtodescribeoursafepredictorgrowsexponentially. In
+practice,however,weexpectmanyoftheconstraintoverlapsets,O ,tobeempty. Consequently,any
+b
+predictorscorrespondingtoanemptysetcanbeignored. Thissignificantlyreducesthenumberof
+constrainedpredictorsneededformanyapplications.
+SeeFigure1foranillustrativeexampleofhowtoconstructF(x)foranotionalproblemwithtwo
+overlappinginput-outputconstraints.
+2.1 ProximityFunctions
+Theproximityfunctions,σ ,describehowcloseaninput,x,istoaparticularinputconstraintregion,
+i
+A . These functions are used to compute the weights of the constrained predictors. A desirable
+i
+propertyforσ isforσ (x) → 1asd(x,A ) → ∞,forsomedistancefunction. Thisensuresthat
+i i i
+whenaninputisfarfromaconstraintregion,thatconstrainthaslittleinfluenceonthepredictionfor
+thatinput. Anaturalchoiceforsuchafunctionis:
+(cid:18)
+d(x,A
+)(cid:19)σ2
+σ (x;Σ )=1−exp − i .
+i i σ
+1
+Here, Σ is a set of parameters σ ∈ (0,∞) and σ ∈ (1,∞), which can be specified based on
+i 1 2
+engineering judgment, or learned using optimization over training data. In our experiments in
+this paper, we use proximity functions of this form and learn independent parameters for each
+input-constrainedregion. Weplantoexploreotherchoicesforproximityfunctionsinfuturework.
+22.2 Learning
+If we have families of differentiable functions G (x;θ ), continuously parameterized by θ , and
+b b b
+familiesofσ (x;χ ),differentiableandcontinuouslyparameterizedbyχ ,thenF(x;Θ,X),where
+i i i
+Θ={θ :b∈O}andX ={χ :i=1,...,c},isalsocontinuouslyparameterizedanddifferentiable.
+b i
+Wecanthusapplystandardoptimizationtechniques(e.g.,gradientdescent)tofindparametersofF
+thatminimizealossfunctiononsomedataset,whilealsopreservingthedesiredsafetyproperties.
+Note that the safety guarantee holds regardless of the parameters. To create each G (x;θ ) we
+b b
+considerchoosing:
+• alatentspaceRm,
+• amaph :Rm →B ,
+b b
+• astandardneuralnetworkarchitectureg :X →Rm,
+b
+andthendefiningG (x;θ )=h (g (x;θ )).
+b b b b b
+Theframeworkproposedheredoesnotrequireanentirelyseparatenetworkforeachb. Inmany
+applications, it may be advantageous for the constrained predictors to share earlier layers, thus
+creatingasharedrepresentationoftheinputspace. Inaddition,ourdefinitionofthesafepredictoris
+generalandisnotlimitedtoneuralnetworks.
+InAppendixB,weshowexamplesofapplyingourapproachtosyntheticdatasetsin2-Dand3-D
+with simple neural networks. These examples show that our safe predictor can enforce arbitrary
+input-outputspecificationsusingconvexoutputconstraintsonneuralnetworks,andthatthelearned
+functionissmooth.
+3 ApplicationtoAircraftCollisionAvoidance
+Aircraft collision avoidance requires robust safety guarantees. The Next-Generation Collision
+AvoidanceSystem(ACASX),whichissuesadvisoriestopreventnearmid-aircollisions,hasboth
+manned(ACASXa)andunmanned(ACASXu)variants. Thesystemwasoriginallydesignedto
+chooseoptimaladvisorieswhileminimizingdisruptivealertsbysolvingapartiallyobservableMarkov
+decisionprocess. Thesolutiontooktheformofalargelook-uptable,mappingeachpossibleinput
+combinationtoscoresforallpossibleadvisories. Theadvisorywiththehighestscorewouldthenbe
+issued. Byusingadeepneuralnetwork(DNN)tocompressthepolicytables,ithasbeennecessaryto
+verifythattheDNNsmeetcertainsafetyspecifications.
+Adesirable2˘01csafeability2˘01dpropertyforACASXwasdefinedinapreviouswork. Thisproperty
+speci01edthatforanygiveninputstatewithinthe2˘01csafeableregion,2˘01danadvisorywouldnever
+beissuedthatcouldputtheaircraftintoastatewhereasafeadvisorywouldnolongerexist. This
+conceptissimilartocontrolinvariance. AsimplifiedmodeloftheACASXasystemwascreated,
+namedVerticalCAS.DNNswerethengeneratedtoapproximatethelearnedpolicy,andReluplexwas
+usedtoverifywhethertheDNNssatisfiedthesafeabilityproperty. Thisworkfoundthousandsof
+counterexampleswheretheDNNsdidnotmeetthecriteria.
+Ourapproachfordesigningasafepredictorensuresanycollisionavoidancesystemwillmeetthe
+safeabilitypropertybyconstruction. AppendixCdescribesindetailhowweapplyourapproachto
+asubsetoftheVerticalCASdatasetsusingaconservative,convexapproximationofthesafeability
+constraints. Theseconstraintsaredefinedsuchthatifanaircraftstateisinthe"unsafeableregion",
+A , for the ith advisory, the score for that advisory must not be the highest, i.e., x ∈
+unsafeable,i
+A ⇒F (x)<max F (x),whereF (x)istheoutputscoreforthejthadvisory.
+unsafeable,i i j j j
+Table1showstheperformanceofastandard,unconstrainednetworkandoursafepredictor. Forboth
+networks,wepresentthepercentageaccuracy(ACC)andviolations(percentageofinputsforwhich
+thenetworkoutputsanunsafeadvisory). WetrainandtestusingPyTorchwithtwoseparatedatasets,
+basedonthepreviousadvisorybeingClearofConflict(COC)andClimbat1500ft/min(CL1500).
+Asshowninthetable,oursafepredictoradherestotherequiredsafeabilityproperty. Furthermore,
+theaccuracyofourpredictorremainsthesameastheunconstrainednetwork,demonstratingweare
+notlosingaccuracytoachievesafetyguarantees.
+3Table1: Resultsofthebestconfigurationsofβ-TCVAEonDCI,FactorVAE,SAP,MIG,andIRS
+metrics.
+NETWORK ACC(COC) VIOLATIONS(COC) ACC(CL1500) VIOLATIONS(CL1500)
+STANDARD 96.87 0.22 93.89 0.20
+SAFE 96.69 0.00 94.78 0.00
+4 DiscussionandFutureWork
+Weproposeanapproachfordesigningasafepredictorthatadherestoinput-outputspecificationsfor
+useinsafety-criticalmachinelearningsystems,demonstratingitonanaircraftcollisionavoidance
+problem. Thenoveltyofourapproachisitssimplicityandguaranteedenforcementofspecifications
+throughcombinationsofconvexoutputconstraintsduringallstagesoftraining. Futureworkincludes
+adaptingandusingtechniquesfromoptimizationandcontrolbarrierfunctions,aswellasincorporating
+notionsofadversarialrobustnessintoourdesign,suchasextendingtheworktoboundtheLipschitz
+constantofournetworks.
+AppendixA:ProofofTheorem2.1
+Proof. Fix i and assume that x ∈ A . It follows that σ (x) = 0, so for all b ∈ O where b = 0,
+i i i
+w (x)=0. Thus,
+b
+(cid:88)
+F(x)= w (x)G (x).
+b b
+b∈O,bi=1
+Ifb =1,G (x)∈B ,andthusF(x)isalsoinB bytheconvexityofB .
+i b i i i
+AppendixB:ExampleonSyntheticDatasets
+Figure2depictsanexampleofapplyingoursafepredictortoanotionalregressionproblem. This
+exampleusesinputsandoutputsin1-Dwithoneinput-outputconstraint. Theunconstrainednetwork
+consistsofasinglehiddenlayerwithadimensionof10,ReLUactivations,andafullyconnectedlayer.
+Thesafepredictorsharesthisstructurewiththeunconstrainednetworkbuthasitsownfullyconnected
+layer for the constrained predictors, G and G . Training uses a sampled subset of points from
+0 1
+theinputspace. Figure3showsanexampleofapplyingoursafepredictortoanotionalregression
+problemwitha2-Dinputand1-Doutput,usingtwooverlappingconstraints. Theunconstrained
+networkhastwohiddenlayersofdimension20andReLUactivations,followedbyafullyconnected
+layer. Theconstrainedpredictors,G ,G ,G ,andG ,sharethehiddenlayersbutalsohavean
+00 10 01 11
+additionalhiddenlayerofsize20withReLU,followedbyafullyconnectedlayer. Trainingusesa
+sampledsubsetofpointsfromtheinputspace.
+AppendixC:DetailsofVerticalCASExperiment
+C.1SafeabilityConstraints
+The"safeability"property,originallyintroducedandusedtoverifythesafetyoftheVerticalCAS
+neural networks can be encoded into a set of input-output constraints. The "safeable region" for
+a given advisory represents input locations where that advisory can be selected such that future
+advisoriesexistthatwillpreventanNMAC.Ifnofutureadvisoriesexist,theadvisoryis"unsafeable"
+andthecorrespondinginputregionisthe"unsafeableregion". Examplesoftheseregions,andtheir
+proximityfunctionsareshowninFigure5fortheCL1500advisory.
+Theconstraintsweenforcearethatx∈A ⇒F (x)<max F (x),∀i,whereA is
+unsafeable,i i j j unsafeable,i
+theunsafeableregionfortheithadvisory,andF (x)istheoutputscoreforthejthadvisory. Because
+j
+theoutputregionsofthesafeableconstraintsarenotconvex,wemakeaconservativeapproximation,
+enforcingF (x)=min F (x),forallx∈A .
+i j j unsafeable,i
+4C.2ProximityFunctions
+Westartbygeneratingtheunsafeableregionboundsfromtheopensourcecode. Wethencomputea
+"distancefunction"betweeninputspacepoints(vO-vI,h,τ),andtheunsafeableregionforeach
+advisory. Thesearenottruedistancesbutare0ifandonlyifthedatapointiswithintheunsafeable
+set. ThesearethenusedtoproduceproximityfunctionsasgiveninEquation1.
+C.3StructureofPredictors
+ThecompressedpolicytablesforACASXuandVerticalCASuseneuralnetworkswithsixhidden
+layerswithadimensionof45,andReLUactivationfunctions. Weusedthesamearchitectureforthe
+unconstrainednetwork. Forourconstrainedpredictors,weusethesamestructurebuthaveshared
+firstfourlayersforallpredictors. Thisprovidesacommonlearnedrepresentationoftheinputspace,
+whileallowingeachpredictortoadapttoitsownconstraints.Afterthesharedlayers,eachconstrained
+predictorhasanadditionaltwohiddenlayersandtheirfinaloutputsareprojectedontoourconvex
+approximationofthesaferegionoftheoutputspace,usingG (x)=min G (x).Inourexperiments,
+b j j
+wesetϵ=0.0001.
+With this construction, we needed 30 separate predictors to enforce the VerticalCAS safeability
+constraints. Thenumberofnodesfortheunconstrainedandsafeimplementationswere270and2880,
+respectively. Oursafepredictorisordersofmagnitudesmallerthantheoriginallook-uptables.
+C.4ParameterOptimization
+WeusePyTorchfordefiningournetworksandperformingparameteroptimization. Weoptimizeboth
+theunconstrainedandsafepredictorsusingtheasymmetriclossfunctiontoselectadvisorieswhile
+alsoaccuratelypredictingscores. Thedataissplitusingan80/20train/testsplitwitharandomseed
+of0. TheoptimizerisADAMwithalearningrateof0.0003andbatchsizeof216,withtrainingfor
+500epochs.
+AppendixA:ProofofTheorem2.1
+Proof. Letx∈A . Then,σ (x)=0,andforallb∈Owhereb =0,w (x)=0. Thus,
+i i i b
+(cid:88)
+F(x)= w (x)G (x)
+b b
+b∈O,bi=1
+Ifb =1,thenG (x)∈B ,andthereforeF(x)isinB duetotheconvexityofB .
+i b i i i
+AppendixB:ExampleonSyntheticDatasets
+Figure2depictsanexampleofapplyingoursafepredictortoanotionalregressionproblemwith1-D
+inputandoutputs,andoneinput-outputconstraint. Theunconstrainednetworkhasasinglehidden
+layerofdimension10withReLUactivations,followedbyafullyconnectedlayer. Thesafepredictor
+sharesthisstructurewithconstrainedpredictors,G andG ,buteachpredictorhasitsownfully
+0 1
+connectedlayer. Thetrainingusesasampledsubsetofpointsfromtheinputspaceandthelearned
+predictorsareshownforthecontinuousinputspace.
+Figure3showsanexampleofapplyingthesafepredictortoanotionalregressionproblemwitha2-D
+inputand1-Doutputandtwooverlappingconstraints. Theunconstrainednetworkhastwohidden
+layersofdimension20withReLUactivations,followedbyafullyconnectedlayer. Theconstrained
+predictorsG ,G ,G andG sharethehiddenlayersandhaveanadditionalhiddenlayerofsize
+00 10 01 11
+20withReLUfollowedbyafullyconnectedlayer. Again,trainingusesasampledsubsetofpoints
+fromtheinputspaceandthelearnedpredictorsareshownforthecontinuousinputspace.
+5AppendixC:DetailsofVerticalCASExperiment
+C.1SafeabilityConstraints
+The“safeability”propertyfrompriorworkcanbeencodedintoasetofinput-outputconstraints. The
+“safeableregion”foragivenadvisoryisthesetofinputspacelocationswherethatadvisorycanbe
+chosen,forwhichfutureadvisoriesexistthatwillpreventanNMAC.Ifnofutureadvisoriesexistfor
+preventinganNMAC,theadvisoryisdeemed“unsafeable,”andthecorrespondinginputregionisthe
+“unsafeableregion.”Figure5showsanexampleoftheseregionsfortheCL1500advisory.
+The constraints we enforce in our safe predictor are: x ∈ A ⇒ F (x) < max F (x),
+unsafeable,i i j j
+∀i. Tomaketheoutputregionsconvex,weapproximatebyenforcingF (x)=min F (x),forall
+i j j
+x∈A .
+unsafeable,i
+C.2ProximityFunctions
+Westartbygeneratingtheboundsontheunsafeableregions. Then,adistancefunctioniscomputed
+betweenpointsintheinputspace(v −v ,h,τ),andtheunsafeableregionforeachadvisory. While
+O I
+thesearenottruedistances,theirvaluesare0ifandonlyifthedatapointisinsidetheunsafeableset.
+WhenusedtoproduceproximityfunctionsasgiveninEquation1,thesevalueshelpensuresafety.
+Figure5showsexamplesoftheunsafeableregion,distancefunction,andproximityfunctionforthe
+CL1500advisory.
+C.3StructureofPredictors
+Thecompressedversionsofthepolicytablesfrompriorworkareneuralnetworkswithsixhidden
+layers,45dimensionsineachlayer,andReLUactivationfunctions. Weusethesamearchitecture
+forourstandard,unconstrainednetwork. Forconstrainedpredictors,weuseasimilararchitecture.
+However,thefirstfourhiddenlayersaresharedbetweenallofthepredictors. Thislearnsasingle,
+sharedinputspacerepresentation,andalsoallowseachpredictortoadapttoitsconstraints. Each
+constrainedpredictorhastwoadditionalhiddenlayersandtheiroutputsareprojectedontoourconvex
+approximationofthesafeoutputregion. Weaccomplishthisbysettingthescoreforanyunsafeable
+advisoryitoG (x)=min G (x)−ϵ. Inourexperiments,weusedϵ=0.0001.
+i j j
+ToenforcetheVerticalCASsafeabilityconstraints,weneed30separatepredictors. Thisincreases
+the size of the network from 270 to 2880 nodes for the unconstrained and safe implementations
+respectively. However,oursafepredictorremainssmallerthantheoriginallook-uptablesbyseveral
+ordersofmagnitude.
+C.4ParameterOptimization
+We define our networks and perform parameter optimization using PyTorch. We optimize the
+parameters of both the unconstrained network and our safe predictor using the asymmetric loss
+function,guidingthenetworktoselectoptimaladvisorieswhileaccuratelypredictingscoresfrom
+thelook-uptables. Eachdatasetissplitusingan80/20train/testsplit,witharandomseedof0. The
+optimizerisADAM,withalearningrateof0.0003,abatchsizeof216,andthenumberoftraining
+epochsis500.
+6

@@ -1,0 +1,438 @@
+Generalization in ReLU Networks via Restricted
+Isometry and Norm Concentration
+Abstract
+Regressiontasks,whileaimingtomodelrelationshipsacrosstheentireinputspace,
+areoftenconstrainedbylimitedtrainingdata. Nevertheless,ifthehypothesisfunc-
+tionscanberepresentedeffectivelybythedata,thereispotentialforidentifyinga
+modelthatgeneralizeswell. ThispaperintroducestheNeuralRestrictedIsometry
+Property(NeuRIPs),whichactsasauniformconcentrationeventthatensuresall
+shallowReLUnetworksaresketchedwithcomparablequality. Todeterminethe
+samplecomplexitynecessarytoachieveNeuRIPs,weboundthecoveringnumbers
+ofthenetworksusingtheSub-Gaussianmetricandapplychainingtechniques. As-
+sumingtheNeuRIPsevent,wethenprovideboundsontheexpectedrisk,applicable
+tonetworkswithinanysublevelsetoftheempiricalrisk. Ourresultsshowthatall
+networkswithsufficientlysmallempiricalriskachieveuniformgeneralization.
+1 Introduction
+Afundamentalrequirementofanyscientificmodelisaclearevaluationofitslimitations. Inrecent
+years,supervisedmachinelearninghasseenthedevelopmentoftoolsforautomatedmodeldiscovery
+fromtrainingdata. However,thesemethodsoftenlackarobusttheoreticalframeworktoestimate
+model limitations. Statistical learning theory quantifies the limitation of a trained model by the
+generalizationerror.ThistheoryusesconceptssuchastheVC-dimensionandRademachercomplexity
+toanalyzegeneralizationerrorboundsforclassificationproblems. Whilethesetraditionalcomplexity
+notions have been successful in classification problems, they do not apply to generic regression
+problemswithunboundedriskfunctions,whicharethefocusofthisstudy. Moreover,traditional
+tools in statistical learning theory have not been able to provide a fully satisfying generalization
+theoryforneuralnetworks.
+Understandingtherisksurfaceduringneuralnetworktrainingiscrucialforestablishingastrong
+theoreticalfoundationforneuralnetwork-basedmachinelearning,particularlyforunderstanding
+generalization. Recentstudiesonneuralnetworkssuggestintriguingpropertiesoftherisksurface.
+Inlargenetworks,localminimaoftheriskformasmallbondattheglobalminimum. Surprisingly,
+globalminimaexistineachconnectedcomponentoftherisk’ssublevelsetandarepath-connected.
+Inthiswork,wecontributetoageneralizationtheoryforshallowReLUnetworks,bygivinguniform
+generalizationerrorboundswithintheempiricalrisk’ssublevelset.Weusemethodsfromtheanalysis
+ofconvexlinearregression,wheregeneralizationboundsforempiricalriskminimizersarederived
+fromrecentadvancementsinstochasticprocesses’chainingtheory. Empiricalriskminimization
+fornon-convexhypothesisfunctionscannotgenerallybesolvedefficiently. However,undercertain
+assumptions,itisstillpossibletoderivegeneralizationerrorbounds,aswedemonstrateinthispaper
+for shallow ReLU networks. Existing works have applied methods from compressed sensing to
+boundgeneralizationerrorsforarbitraryhypothesisfunctions. However, theydonotcapturethe
+risk’sstochasticnaturethroughthemoreadvancedchainingtheory.
+Thispaperisorganizedasfollows. WebegininSectionIIbyoutliningourassumptionsaboutthe
+parametersofshallowReLUnetworksandthedatadistributiontobeinterpolated. Theexpectedand
+empiricalriskareintroducedinSectionIII,wherewedefinetheNeuralRestrictedIsometryProperty
+.(NeuRIPs)asauniformnormconcentrationevent. Wepresentaboundonthesamplecomplexityfor
+achievingNeuRIPsinTheorem1,whichdependsonboththenetworkarchitectureandparameter
+assumptions. Weprovideupperboundsonthegeneralizationerrorthatareuniformlyapplicable
+across the sublevel sets of the empirical risk in Section IV. We prove this property in a network
+recoverysettinginTheorem2,andalsoanagnosticlearningsettinginTheorem3. Theseresults
+ensureasmallgeneralizationerror,whenanyoptimizationalgorithmfindsanetworkwithasmall
+empiricalrisk. Wedevelopthekeyprooftechniquesforderivingthesamplecomplexityofachieving
+NeuRIPsinSectionV,byusingthechainingtheoryofstochasticprocesses. Thederivedresultsare
+summarizedinSectionVI,wherewealsoexplorepotentialfutureresearchdirections.
+2 NotationandAssumptions
+Inthissection,wewilldefinethekeynotationsandassumptionsfortheneuralnetworksexamined
+inthisstudy. ARectifiedLinearUnit(ReLU)functionϕ:R→Risgivenbyϕ(x):=max(x,0).
+Givenaweightvectorw ∈ Rd,abiasb ∈ R,andasignκ ∈ {±1},aReLUneuronisafunction
+ϕ(w,b,κ):Rd →Rdefinedas
+ϕ(w,b,κ)(x)=κϕ(wTx+b).
+Shallowneuralnetworksareconstructedasweightedsumsofneurons. Typicallytheyarerepresented
+byagraphwithnneuronsinasinglehiddenlayer. WhenusingtheReLUactivationfunction,wecan
+applyasymmetryproceduretorepresenttheseassums:
+n
+ϕ¯ (x)=(cid:88) ϕ (x),
+p¯ pi
+i=0
+wherep¯isthetuple(p ,...,p ).
+1 n
+Assumption1. Theparametersp¯,whichindexshallowReLUnetworks,aredrawnfromaset
+P¯ ⊆(Rd×R×{±1})n.
+ForP¯,weassumethereexistconstantsc ≥ 0andc ∈ [1,3],suchthatforallparametertuples
+w b
+p¯={(w ,b ,κ ),...,(w ,b ,κ )}∈P¯,wehave
+1 1 1 n n n
+∥w ∥≤c and |b |≤c .
+i w i b
+WedenotethesetofshallownetworksindexedbyaparametersetP¯ by
+Φ P¯ :={ϕ p¯:p¯∈P¯}.
+WenowequiptheinputspaceRdofthenetworkswithaprobabilitydistribution. Thisdistribution
+reflectsthesamplingprocessandmakeseachneuralnetworkarandomvariable. Additionally, a
+randomlabelytakesitsvaluesintheoutputspaceR,forwhichweassumethefollowing.
+Assumption2. Therandomsamplex∈Rdandlabely ∈Rfollowajointdistributionµsuchthat
+themarginaldistributionµ ofsamplexisstandardGaussianwithdensity
+x
+1
+(cid:18) ∥x∥2(cid:19)
+exp − .
+(2π)d/2 2
+As available data, we assume independent copies {(x ,y )}m of the random pair (x,y), each
+j j j=1
+distributedbyµ.
+3 ConcentrationoftheEmpiricalNorm
+Supervisedlearningalgorithmsinterpolatelabelsyforsamplesx,bothdistributedjointlybyµon
+X ×Y. This task is often solved under limited data accessibility. The training data, respecting
+Assumption 2, consists of m independent copies of the random pair (x,y). During training, the
+interpolationqualityofahypothesisfunctionf :X →Y canonlybeassessedatthegivenrandom
+samples{x }m . Anyalgorithmthereforeaccesseseachfunctionf throughitssketchsamples
+j j=1
+S[f]=(f(x ),...,f(x )),
+1 m
+2whereS isthesampleoperator. Aftertraining,thequalityofaresultingmodelisoftenmeasuredby
+itsgeneralizationtonewdatanotusedduringtraining. WithRd×Rastheinputandoutputspace,
+wequantifyafunctionf’sgeneralizationerrorwithitsexpectedrisk:
+E [f]:=E |y−f(x)|2.
+µ µ
+The functional ||·|| , also gives the norm of the space L2(Rd,µ ), which consists of functions
+µ x
+f :Rd →Rwith
+∥f∥2 :=E [|f(x)|2].
+µ µx
+Ifthelabelydependsdeterministicallyontheassociatedsamplex,wecantreatyasanelementof
+L2(Rd,µ ),andtheexpectedriskofanyfunctionf isthefunction’sdistancetoy. Bysketchingany
+x
+hypothesisfunctionf withthesampleoperatorS,weperformaMonte-Carloapproximationofthe
+expectedrisk,whichistermedtheempiricalrisk:
+∥f∥2
+m
+:= m1 (cid:88)m (f(x j)−y j)2 =(cid:13) (cid:13) (cid:13) (cid:13)√1 m(y 1,...,y m)T −S[f](cid:13) (cid:13) (cid:13) (cid:13)2 .
+j=1 2
+Therandomfunctional||·|| alsodefinesaseminormonL2(Rd,µ ),referredtoastheempirical
+m x
+norm. Undermildassumptions,||·|| failstobeanorm.
+m
+Inordertoobtainawellgeneralizingmodel,thegoalistoidentifyafunctionf withalowexpected
+risk. However,withlimiteddata,wearerestrictedtooptimizingtheempiricalrisk. Ourstrategyfor
+derivinggeneralizationguaranteesisbasedonthestochasticrelationbetweenbothrisks. If{x }m
+j j=1
+areindependentlydistributedbyµ ,thelawoflargenumbersimpliesthatforanyf ∈L2(Rd,µ )
+x x
+theconvergence
+lim ∥f∥ =∥f∥ .
+m µ
+m→∞
+Whilethisestablishestheasymptoticconvergenceoftheempiricalnormtothefunctionnormfora
+singlefunctionf,wehavetoconsidertwoissuestoformulateourconceptofnormconcentration:
+First, we need non-asymptotic results, that is bounds on the distance |∥f∥ −∥f∥ | for a fixed
+m µ
+numberofsamplesm. Second,theboundsonthedistanceneedtobeuniformlyvalidforallfunctions
+f inagivenset.
+Sample operators which have uniform concentration properties have been studied as restricted
+isometriesintheareaofcompressedsensing. ForshallowReLUnetworksoftheform(1),wedefine
+therestrictedisometrypropertyofthesamplingoperatorS asfollows.
+Definition1. Lets∈(0,1)beaconstantandP¯beaparameterset. WesaythattheNeuralRestricted
+IsometryProperty(NeuRIPs(P¯))issatisfiedif,forallp¯∈P¯ itholdsthat
+(1−s)∥ϕ ∥ ≤∥ϕ ∥ ≤(1+s)∥ϕ ∥ .
+p¯ µ p¯ m p¯ µ
+InthefollowingTheorem,weprovideaboundonthenumbermofsamples,whichissufficientfor
+theoperatorS tosatisfyNeuRIPs(P¯).
+Theorem 1. There exist universal constants C , C ∈ R such that the following holds: For
+1 2
+any sample operator S, constructed from random samples {x }, respecting Assumption 2, let
+j
+P¯ ⊂ (Rd ×R×{±1})n be any parameter set satisfying Assumption 1 and ||ϕ || > 1 for all
+p¯ µ
+p¯ ∈ P¯. Then, for any u > 2 and s ∈ (0,1), NeuRIPs(P¯) is satisfied with probability at least
+1−17exp(−u/4)providedthat
+n3c2 (cid:18) (8c +d+ln(2)) n2c2 (cid:19)
+m≥ w max C b ,C w .
+(1−s)2 1 u 2(u/s)2
+Oneshouldnoticethat,inTheorem1,thereisatradeoffbetweentheparameters,whichlimitsthe
+deviation|∥·∥ −∥·∥ |,andtheconfidenceparameteru. Thelowerboundonthecorresponding
+m µ
+samplesizemissplitintotwoscalingregimeswhenunderstandingthequotientuof|∥·∥ −∥·∥ |/s
+m µ
+asaprecisionparameter. Whileintheregimeoflowdeviationsandhighprobabilitiesthesamplesize
+mmustscalequadraticallywithu/s,intheregimeoflessprecisestatementsoneobservesalinear
+scaling.
+34 UniformGeneralizationofSublevelSetsoftheEmpiricalRisk
+WhentheNeuRIPseventoccurs,thefunctionnorm||·|| ,whichisrelatedtotheexpectedrisk,is
+µ
+closeto||·|| ,whichcorrespondstotheempiricalrisk. Motivatedbythisproperty,weaimtofind
+m
+ashallowReLUnetworkϕ withsmallexpectedriskbysolvingtheempiricalriskminimization
+p¯
+problem:
+min∥ϕ −y∥2 .
+p¯ m
+p¯∈P¯
+Since the set Φ P¯ of shallow ReLU networks is non-convex, this minimization cannot be solved
+withefficientconvexoptimizers. Therefore,insteadofanalyzingonlythesolutionϕ∗ oftheopti-
+p¯
+mizationproblem,weintroduceatoleranceϵ>0fortheempiricalriskandprovideboundsonthe
+generalizationerror,whichholduniformlyonthesublevelset
+Q¯ :=(cid:8) p¯∈P¯ :∥ϕ −y∥2 ≤ϵ(cid:9) .
+y,ϵ p¯ m
+Beforeconsideringgenericregressionproblems,wewillinitiallyassumethelabelytobeaneural
+networkitself,parameterizedbyatuplep∗withinthehypothesissetP.Forall(x,y)inthesupportof
+µ,wehavey =ϕ (x)andtheexpectedrisk’sminimumonP iszero. Usingthesufficientcondition
+p∗
+forNeuRIPsfromTheorem1,wecanprovidegeneralizationboundsforϕ ∈Q¯ foranyϵ>0.
+p¯ y,ϵ
+Theorem2. LetP¯ beaparametersetthatsatisfiesAssumption1andletu ≥ 2andt ≥ ϵ > 0be
+constants. Furthermore,letthenumbermofsamplessatisfy
+(cid:18) u n2c2u (cid:19)
+m≥8n3c2 (8c +d+ln(2))max C ,C w ,
+w b 1(t−ϵ)2 2(t−ϵ)2
+whereC andC areuniversalconstants. Let{(x ,y )}m beadatasetrespectingAssumption2
+1 2 j j j=1
+andletthereexistap¯∗ ∈P¯ suchthaty =ϕ (x )holdsforallj ∈[m]. Then,withprobabilityat
+j p¯∗ j
+least1−17exp(−u/4),wehaveforallq¯∈Q¯ that
+y,ϵ
+∥ϕ −ϕ ∥2 ≤t.
+q¯ p¯∗ µ
+Proof. WenoticethatQ¯ isasetofshallowneuralnetworkswith2nneurons. Wenormalizesuch
+y,ϵ
+networkswithafunctionnormgreaterthantandparameterizethemby
+R¯ :={ϕ −ϕ :p¯∈P¯,∥ϕ −ϕ ∥ >t}.
+t p¯ p¯∗ p¯ p¯∗ µ
+WeassumethatNeuRIPs(R¯ )holdsfors=(t−ϵ)2/t2. Inthiscase,forallq¯∈Q¯ ,wehavethat
+t y,ϵ
+∥ϕ −ϕ ∥ ≥tandthusq¯∈/ Q¯ ,whichimpliesthat∥ϕ −ϕ ∥ ≤t.
+q¯ p¯∗ m ϕp¯∗,ϵ q¯ p¯∗ µ
+WealsonotethatR¯ satisfiesAssumption1witharescaledconstantc /tandnormalization-invariant
+t w
+c , if P¯ satisfies it for c and c . Theorem 1 gives a lower bound on the sample complexity for
+b w b
+NeuRIPs(R¯ ),completingtheproof.
+t
+Atanynetworkwhereanoptimizationmethodterminates,theconcentrationoftheempiricalrisk
+attheexpectedriskcanbeachievedwithlessdatathanneededtoachieveananalogousNeuRIPs
+event. However, in the chosen stochastic setting, we cannot assume that the termination of an
+optimizationandthenormconcentrationatthatnetworkareindependentevents. Weovercomethis
+bynotspecifyingtheoutcomeofanoptimizationmethodandinsteadstatinguniformboundson
+thenormconcentration. Theonlyassumptiononanalgorithmisthereforetheidentificationofa
+networkthatpermitsanupperboundϵonitsempiricalrisk. TheeventNeuRIPs(R¯ )thenrestrictsthe
+t
+expectedrisktobebelowthecorrespondinglevelt.
+WenowdiscusstheempiricalrisksurfaceforgenericdistributionsµthatsatisfyAssumption2,where
+ydoesnotnecessarilyhavetobeaneuralnetwork.
+Theorem3. ThereexistconstantsC ,C ,C ,C ,C ,andC suchthatthefollowingholds: LetP¯
+0 1 2 3 4 5
+satisfyAssumption1forsomeconstantsc ,c ,andletp¯∗ ∈ P¯ besuchthatforsomec ≥ 0we
+w b p¯∗
+have
+(cid:20) (cid:18)
+(y−ϕ
+(x))2(cid:19)(cid:21)
+E exp
+p¯∗
+≤2.
+µ c2
+p¯∗
+Weassume,foranys ∈ (0,1)andconfidenceparameteru > 0,thatthenumberofsamplesmis
+largeenoughsuchthat
+8 (cid:18) (cid:18) n3c2(8c +d+ln(2))(cid:19) (cid:16)u(cid:17)(cid:19)
+m≥ max C w b ,C n2c2 .
+(1−s)2 1 u 2 w s
+4Wefurtherselectconfidenceparametersv ,v >C ,anddefineforsomeω ≥0theparameter
+1 2 0
+1 √
+η :=2(1−s)∥ϕ −y∥ +C v v c +ω 1−s.
+p¯∗ µ 3 1 2 p¯∗ (1−s)1/4
+Ifwesetϵ=∥ϕ −y∥2 +ω2asthetolerancefortheempiricalrisk,thentheprobabilitythatall
+p¯∗ m
+q¯∈Q¯ satisfy
+y,ϵ
+∥ϕ −y∥ ≤η
+q¯ µ
+isatleast
+(cid:16) u(cid:17) (cid:18) C mv2(cid:19)
+1−17exp − −C v exp − 4 2 .
+4 5 2 2
+Proofsketch. (CompleteproofinAppendixE)Wefirstdefineanddecomposetheexcessriskby
+m
+2 (cid:88)
+E(q¯,p¯∗):=∥ϕ −y∥2 −∥ϕ −y∥2 =∥ϕ −ϕ ∥2 − (ϕ (x )−y )(ϕ (x )−ϕ (x )).
+q¯ µ p¯∗ µ q¯ p¯∗ µ m p¯∗ j j q¯ j p¯∗ j
+j=1
+Itsufficestoshow,thatwithinthestatedconfidencelevelwehave∥ϕ −y∥ >η. Thisimpliesthe
+q¯ µ
+claimsince∥ϕ −y∥ ≤ϵimplies∥ϕ −y∥ ≤η. WehaveE[E(q¯,p¯∗)]>0. Itnowonlyremains
+q¯ m q¯ µ
+tostrengthentheconditiononη > 3∥ϕ −y∥ toachieveE(q¯,p¯∗) > ω2. WeapplyTheorem1
+p¯∗ µ
+toderiveaboundonthefluctuationofthefirstterm. Theconcentrationrateofthesecondtermis
+derivedsimilartoTheorem1byusingchainingtechniques. FinallyinAppendixE,Theorem12gives
+ageneralboundtoachieve
+E(q¯,p¯∗)>ω2
+uniformlyforallq¯with∥ϕ −ϕ ∥ >η. Theorem3thenfollowsasasimplification.
+q¯ p¯∗ µ
+Itisimportanttonoticethat,inTheorem3,asthedatasizemapproachesinfinity,onecanselect
+anasymptoticallysmalldeviationconstants. Inthislimit,theboundηonthegeneralizationerror
+convergesto3∥ϕ −y∥ +ω. Thisreflectsalowerlimitofthegeneralizationbound,whichisthe
+p¯∗ µ
+sumofthetheoreticallyachievableminimumoftheexpectedriskandtheadditionaltoleranceω.
+Thelatterisanupperboundontheempiricalrisk,whichreal-worldoptimizationalgorithmscanbe
+expectedtoachieve.
+5 SizeControlofStochasticProcessesonShallowNetworks
+Inthissection,weintroducethekeytechniquesforderivingconcentrationstatementsfortheem-
+piricalnorm,uniformlyvalidforsetsofshallowReLUnetworks. Webeginbyrewritingtheevent
+NeuRIPs(P¯) by treating µ as a stochastic process, indexed by the parameter set P¯. The event
+NeuRIPs(P¯)holdsifandonlyifwehave
+sup|∥ϕ ∥ −∥ϕ ∥ |≤ssup∥ϕ ∥ .
+p¯ m p¯ µ p¯ µ
+p¯∈P¯ p¯∈P¯
+Thesupremumofstochasticprocesseshasbeenstudiedintermsoftheirsize. Todeterminethesize
+ofaprocess,itisessentialtodeterminethecorrelationbetweenitsvariables. Tothisend,wedefine
+theSub-Gaussianmetricforanyparametertuplesp¯,q¯∈P¯ as
+(cid:40) (cid:34) (cid:32) (cid:33)(cid:35) (cid:41)
+|ϕ (x)−ϕ (x)|2
+d (ϕ ,ϕ ):=inf C ≥0:E exp p¯ q¯ ≤2 .
+ψ2 p¯ q¯ ψ2 C2
+ψ2
+AsmallSub-Gaussianmetricbetweenrandomvariablesindicatesthattheirvaluesarelikelytobe
+close. TocapturetheSub-Gaussianstructureofaprocess,weintroduceϵ-netsintheSub-Gaussian
+metric. Foragivenϵ > 0, thesearesubsetsQ¯ ⊆ P¯ suchthatforeveryp¯∈ P¯, thereisaq¯∈ Q¯
+satisfying
+d (ϕ ,ϕ )≤ϵ.
+ψ2 p¯ q¯
+The smallest cardinality of such an ϵ-net Q¯ is known as the Sub-Gaussian covering number
+N(Φ P¯,d ψ2,ϵ). The next Lemma offers a bound for such covering numbers specific to shallow
+ReLUnetworks.
+5Lemma1. LetP¯ beaparametersetsatisfyingAssumption1. ThenthereexistsasetPˆ withP¯ ⊆Pˆ
+suchthat
+(cid:18)
+16nc c
+(cid:19)n (cid:18)
+32nc c
+(cid:19)n (cid:18)
+1
+(cid:18)
+1
+(cid:19) (cid:19)d
+N(Φ ,d ,ϵ)≤2n· b w +1 · b w +1 · sin +1 .
+Pˆ ψ2
+ϵ ϵ ϵ 16nc
+w
+TheproofofthisLemmaisbasedonthetheoryofstochasticprocessesandcanbeseeninTheorem8
+ofAppendixC.
+Toobtainboundsoftheform(6)onthesizeofaprocess,weusethegenericchainingmethod. This
+methodoffersboundsintermsoftheTalagrand-functionaloftheprocessintheSub-Gaussianmetric.
+Wedefineitasfollows. AsequenceT =(T k) k∈N 0 inasetT isadmissibleifT 0 =1andT k ≤2(2k).
+TheTalagrand-functionalofthemetricspaceisthendefinedas
+∞
+(cid:88)
+γ (T,d):= inf sup 2kd(t,T ),
+2 k
+(Tk)t∈T
+k=0
+wheretheinfimumistakenacrossalladmissiblesequences.
+WiththeboundsontheSub-GaussiancoveringnumberfromLemma1,weprovideaboundonthe
+Talagrand-functionalforshallowReLUnetworksinthefollowingLemma. Thisboundisexpectedto
+beofindependentinterest.
+Lemma2. LetP¯ satisfyAssumption1. Thenwehave
+γ 2(Φ P¯,d
+ψ2)≤(cid:114) π2 (cid:18) 8n3/2c w( ln8 (c
+2b
+)+d+1)(cid:112) 2ln(2)(cid:19)
+.
+ThekeyideastoshowthisboundaresimilartotheonesusedtoproveTheorem9inAppendixC.
+To provide bounds for the empirical process, we use the following Lemma, which we prove in
+AppendixD.
+Lemma3. LetΦbeasetofrealfunctions,indexedbyaparametersetP¯ anddefine
+(cid:90) ∞(cid:113)
+N(Φ):= lnN(Φ,d ,ϵ)dϵ and ∆(Φ):= sup∥ϕ∥ .
+ψ2 ψ2
+0 ϕ∈Φ
+Then,foranyu≥2,wehavewithprobabilityatleast1−17exp(−u/4)that
+(cid:20) (cid:21)
+u 10
+sup|∥ϕ∥ −∥ϕ∥ |≤ √ N(Φ)+ ∆(Φ) .
+m µ m 3
+ϕ∈Φ
+TheboundsonthesamplecomplexityforachievingtheNeuRIPsevent,fromTheorem1,areproven
+byapplyingtheseLemmata.
+ProofofTheorem1. Sinceweassume||ϕ || >1forallp¯∈P¯,wehave
+p¯ µ
+sup|∥ϕ ∥ −∥ϕ ∥ |≤ sup|∥ϕ ∥ −∥ϕ ∥ |/∥ϕ ∥ .
+p¯ m p¯ µ p¯ m p¯ µ p¯ µ
+p¯∈P¯ p¯∈P¯
+ApplyingLemma3,andfurtherapplyingtheboundsonthecoveringnumbersandtheTalagrand-
+functionalforshallowReLUnetworks,theNeuRIPs(P¯)eventholdsincaseofs>3. Thesample
+complexitiesthatareprovidedinTheorem1followfromarefinementofthiscondition.
+6 UniformGeneralizationofSublevelSetsoftheEmpiricalRisk
+IncaseoftheNeuRIPsevent,thefunctionnorm||·|| correspondingtotheexpectedriskisclose
+µ
+to||·|| ,whichcorrespondstotheempiricalrisk. Withthepreviousresults,wecannowderive
+m
+uniformgeneralizationerrorboundsinthesublevelsetoftheempiricalrisk.
+Weusesimilartechniquesandwedefinethefollowingsets.
+∥f∥ = sup ∥f∥
+p q
+1≤q≤p
+∞
+(cid:88)
+Λ = inf sup 2k∥f −T (f)∥
+k0,u
+(Tk)f∈F
+k0
+k u2k
+6andweneedthefollowinglemma:
+Lemma9. ForanysetF offunctionsandu≥1,wehave
+√
+Λ (F)≤2 e(γ (F,d )+∆(F)).
+0,u 2 ψ2
+Theorem10. LetPbeaparametersetsatisfyingAssumption1. Then,foranyu≥1,wehavewith
+probabilityatleast1−17exp(−u/4)that
+u (cid:16) (cid:17)
+sup∥ϕ ∥ −∥ϕ ∥ ≤ √ 16n3/2c (8c +d+1)+2nc .
+p¯ m p¯ µ m w b w
+p¯∈P
+Proof. TothisendwehavetoboundtheTalagrandfunctional,wherewecanuseDudley’sinequality
+(Lemma6). Tofinishtheproof,weapplytheboundsonthecoveringnumbersprovidedbyTheorem
+6.
+Theorem11. LetP¯ ⊆(Rd×R×±1)nsatisfyAssumption1. Thenthereexistuniversalconstants
+C ,C suchthat
+1 2
+sup∥ϕ ∥ −∥ϕ ∥
+≤(cid:114) 2 (cid:18) 8n3/2c w(8c b+d+1)(cid:112) 2ln(2)(cid:19)
+.
+p¯ m p¯ µ π ln(2)
+p¯∈P
+7 Conclusion
+Inthisstudy,weinvestigatedtheempiricalrisksurfaceofshallowReLUnetworksintermsofuniform
+concentrationeventsfortheempiricalnorm. WedefinedtheNeuralRestrictedIsometryProperty
+(NeuRIPs)anddeterminedthesamplecomplexityrequiredtoachieveNeuRIPs,whichdependson
+realisticparameterboundsandthenetworkarchitecture. Weappliedourfindingstoderiveupper
+boundsontheexpectedrisk,whicharevaliduniformlyacrosssublevelsetsoftheempiricalrisk.
+Ifanetworkoptimizationalgorithmcanidentifyanetworkwithasmallempiricalrisk,ourresults
+guaranteethatthisnetworkwillgeneralizewell. Byderivinguniformconcentrationstatements,we
+haveresolvedtheproblemofindependencebetweentheterminationofanoptimizationalgorithmat
+acertainnetworkandtheempiricalriskconcentrationatthatnetwork. Futurestudiesmayfocuson
+performinguniformempiricalnormconcentrationonthecriticalpointsoftheempiricalrisk,which
+couldleadtoeventighterboundsforthesamplecomplexity.
+WealsoplantoapplyourmethodstoinputdistributionsmoregeneralthantheGaussiandistribution.
+IfgenericGaussiandistributionscanbehandled,onecouldthenderiveboundsfortheSub-Gaussian
+covering number for deep ReLU networks by induction across layers. We also expect that our
+resultsonthecoveringnumberscouldbeextendedtomoregenericLipschitzcontinuousactivation
+functionsotherthanReLU.Thispropositionisbasedontheconcentrationofmeasurephenomenon,
+whichprovidesboundsontheSub-Gaussiannormoffunctionsonnormalconcentratinginputspaces.
+BecausetheseboundsscalewiththeLipschitzconstantofthefunction,theycanbeusedtofindϵ-nets
+forneuronsthathaveidenticalactivationpatterns.
+BroaderImpact
+Supervisedmachinelearningnowaffectsbothpersonalandpubliclivessignificantly.Generalizationis
+criticaltothereliabilityandsafetyofempiricallytrainedmodels.Ouranalysisaimstoachieveadeeper
+understandingoftherelationshipsbetweengeneralization,architecturaldesign,andavailabledata.
+Wehavediscussedtheconceptsanddemonstratedtheeffectivenessofusinguniformconcentration
+eventsforgeneralizationguaranteesofcommonsupervisedmachinelearningalgorithms.
+7

@@ -1,0 +1,508 @@
+Advancements in 3D Food Modeling: A Review of the
+MetaFood Challenge Techniques and Outcomes
+Abstract
+Thegrowingfocusonleveragingcomputervisionfordietaryoversightandnutri-
+tiontrackinghasspurredthecreationofsophisticated3Dreconstructionmethods
+for food. The lack of comprehensive, high-fidelity data, coupled with limited
+collaborative efforts between academic and industrial sectors, has significantly
+hinderedadvancementsinthisdomain. Thisstudyaddressestheseobstaclesby
+introducingtheMetaFoodChallenge,aimedatgeneratingprecise,volumetrically
+accurate3Dfoodmodelsfrom2Dimages,utilizingacheckerboardforsizecal-
+ibration. Thechallengewasstructuredaround20fooditemsacrossthreelevels
+ofcomplexity: easy(200images),medium(30images),andhard(1image). A
+totalof16teamsparticipatedinthefinalassessmentphase. Themethodologies
+developed during this challenge have yielded highly encouraging outcomes in
+3Dfoodreconstruction,showinggreatpromiseforrefiningportionestimationin
+dietaryevaluationsandnutritionaltracking. Furtherinformationonthisworkshop
+challengeandthedatasetisaccessibleviatheprovidedURL.
+1 Introduction
+Theconvergenceofcomputervisiontechnologieswithculinarypracticeshaspioneeredinnovative
+approachestodietarymonitoringandnutritionalassessment. TheMetaFoodWorkshopChallenge
+representsalandmarkinitiativeinthisemergingfield,respondingtothepressingdemandforprecise
+andscalabletechniquesforestimatingfoodportionsandmonitoringnutritionalconsumption. Such
+technologiesarevitalforfosteringhealthiereatingbehaviorsandaddressinghealthissueslinkedto
+diet.
+Byconcentratingonthedevelopmentofaccurate3Dmodelsoffoodderivedfromvariousvisual
+inputs, including multiple views and single perspectives, this challenge endeavors to bridge the
+disparitybetweencurrentmethodologiesandpracticalneeds. Itpromotesthecreationofunique
+solutionscapableofmanagingtheintricaciesoffoodmorphology,texture,andillumination,whilealso
+meetingthereal-worlddemandsofdietaryevaluation. Thisinitiativegathersexpertsfromcomputer
+vision,machinelearning,andnutritionsciencetopropel3Dfoodreconstructiontechnologiesforward.
+These advancements have the potential to substantially enhance the precision and utility of food
+portionestimationacrossdiverseapplications,fromindividualhealthtrackingtoextensivenutritional
+investigations.
+Conventionalmethodsforassessingdiet,like24-HourRecallorFoodFrequencyQuestionnaires
+(FFQs), are frequently reliant on manual data entry, which is prone to inaccuracies and can be
+burdensome. Thelackof3Ddatain2DRGBfoodimagesfurthercomplicatestheuseofregression-
+basedmethodsforestimatingfoodportionsdirectlyfromimagesofeatingoccasions. Byenhancing
+3Dreconstructionforfood,theaimistoprovidemoreaccurateandintuitivenutritionalassessment
+tools. This technology could revolutionize the sharing of culinary experiences and significantly
+impactnutritionscienceandpublichealth.
+Participantsweretaskedwithcreating3Dmodelsof20distinctfooditemsfrom2Dimages,mim-
+ickingscenarioswheremobiledevicesequippedwithdepth-sensingcamerasareusedfordietary
+.recordingandnutritionaltracking. Thechallengewassegmentedintothreetiersofdifficultybased
+onthenumberofimagesprovided: approximately200imagesforeasy,30formedium,andasingle
+top-view image for hard. This design aimed to rigorously test the adaptability and resilience of
+proposedsolutionsundervariousrealisticconditions. Anotablefeatureofthischallengewastheuse
+ofavisiblecheckerboardforphysicalreferencingandtheprovisionofdepthimagesforeachframe,
+ensuringthe3Dmodelsmaintainedaccuratereal-worldmeasurementsforportionsizeestimation.
+Thisinitiativenotonlyexpandsthefrontiersof3Dreconstructiontechnologybutalsosetsthestage
+formorereliableanduser-friendlyreal-worldapplications,includingimage-baseddietaryassessment.
+Theresultingsolutionsholdthepotentialtoprofoundlyinfluencenutritionalintakemonitoringand
+comprehension,supportingbroaderhealthandwellnessobjectives. Asprogresscontinues,innovative
+applicationsareanticipatedtotransformpersonalhealthmanagement,nutritionalresearch,andthe
+widerfoodindustry. Theremainderofthisreportisstructuredasfollows: Section2delvesintothe
+existingliteratureonfoodportionsizeestimation, Section3describesthedatasetandevaluation
+frameworkusedinthechallenge,andSections4,5,and6discussthemethodologiesandfindingsof
+thetopthreeteams(VolETA,ININ-VIAUN,andFoodRiddle),respectively.
+2 RelatedWork
+Estimatingfoodportionsisacrucialpartofimage-baseddietaryassessment,aimingtodeterminethe
+volume,energycontent,ormacronutrientsdirectlyfromimagesofmeals. Unlikethewell-studied
+taskoffoodrecognition,estimatingfoodportionsisparticularlychallengingduetothelackof3D
+informationandphysicalsizereferencesnecessaryforaccuratelyjudgingtheactualsizeoffood
+portions. Accurateportionsizeestimationrequiresunderstandingthevolumeanddensityoffood,
+elementsthatarehardtodeducefroma2Dimage,underscoringtheneedforsophisticatedtechniques
+totacklethisproblem. Currentmethodsforestimatingfoodportionsaregroupedintofourcategories.
+Stereo-BasedApproachesusemultipleimagestoreconstructthe3Dstructureoffood. Somemethods
+estimate food volume using multi-view stereo reconstruction based on epipolar geometry, while
+othersperformtwo-viewdensereconstruction. SimultaneousLocalizationandMapping(SLAM)has
+alsobeenusedforcontinuous,real-timefoodvolumeestimation. However,thesemethodsarelimited
+bytheirneedformultipleimages,whichisnotalwayspractical.
+Model-BasedApproachesusepredefinedshapesandtemplatestoestimatevolume. Forinstance,
+certaintemplatesareassignedtofoodsfromalibraryandtransformedbasedonphysicalreferencesto
+estimatethesizeandlocationofthefood. Templatematchingapproachesestimatefoodvolumefrom
+asingleimage,buttheystrugglewithvariationsinfoodshapesthatdifferfrompredefinedtemplates.
+Recentworkhasused3Dfoodmeshesastemplatestoaligncameraandobjectposesforportionsize
+estimation.
+DepthCamera-BasedApproachesusedepthcamerastocreatedepthmaps,capturingthedistancefrom
+thecameratothefood. Thesedepthmapsformavoxelrepresentationusedforvolumeestimation.
+Themaindrawbackistheneedforhigh-qualitydepthmapsandtheextraprocessingrequiredfor
+consumer-gradedepthsensors.
+Deep Learning Approaches utilize neural networks trained on large image datasets for portion
+estimation. Regressionnetworksestimatetheenergyvalueoffoodfromsingleimagesorfroman
+"EnergyDistributionMap"thatmapsinputimagestoenergydistributions. Somenetworksuseboth
+imagesanddepthmapstoestimateenergy,mass,andmacronutrientcontent. However,deeplearning
+methods require extensive data for training and are not always interpretable, with performance
+degradingwhentestimagessignificantlydifferfromtrainingdata.
+Whilethesemethodshaveadvancedfoodportionestimation,theyfacelimitationsthathindertheir
+widespreaduseandaccuracy. Stereo-basedmethodsareimpracticalforsingleimages,model-based
+approachesstrugglewithdiversefoodshapes, depthcameramethodsneedspecializedhardware,
+anddeeplearningapproacheslackinterpretabilityandstrugglewithout-of-distributionsamples. 3D
+reconstructionoffersapromisingsolutionbyprovidingcomprehensivespatialinformation,adapting
+to various shapes, potentially working with single images, offering visually interpretable results,
+and enabling a standardized approach to food portion estimation. These benefits motivated the
+organizationofthe3DFoodReconstructionchallenge,aimingtoovercomeexistinglimitationsand
+2develop more accurate, user-friendly, and widely applicable food portion estimation techniques,
+impactingnutritionalassessmentanddietarymonitoring.
+3 DatasetsandEvaluationPipeline
+3.1 DatasetDescription
+ThedatasetfortheMetaFoodChallengefeatures20carefullychosenfooditemsfromtheMetaFood3D
+dataset,eachscannedin3Dandaccompaniedbyvideorecordings. Toensureprecisesizeaccuracy
+inthereconstructed3Dmodels,eachfooditemwascapturedalongsideacheckerboardandpattern
+mat,servingasphysicalscalingreferences. Thechallengeisdividedintothreelevelsofdifficulty,
+determinedbythequantityof2Dimagesprovidedforreconstruction:
+• Easy: Around200imagestakenfromvideo.
+• Medium: 30images.
+• Hard: Asingleimagefromatop-downperspective.
+Table1detailsthefooditemsincludedinthedataset.
+Table1: MetaFoodChallengeDataDetails
+ObjectIndex FoodItem DifficultyLevel NumberofFrames
+1 Strawberry Easy 199
+2 Cinnamonbun Easy 200
+3 Porkrib Easy 200
+4 Corn Easy 200
+5 Frenchtoast Easy 200
+6 Sandwich Easy 200
+7 Burger Easy 200
+8 Cake Easy 200
+9 Blueberrymuffin Medium 30
+10 Banana Medium 30
+11 Salmon Medium 30
+12 Steak Medium 30
+13 Burrito Medium 30
+14 Hotdog Medium 30
+15 Chickennugget Medium 30
+16 Everythingbagel Hard 1
+17 Croissant Hard 1
+18 Shrimp Hard 1
+19 Waffle Hard 1
+20 Pizza Hard 1
+3.2 EvaluationPipeline
+Theevaluationprocessissplitintotwophases,focusingontheaccuracyofthereconstructed3D
+modelsintermsofshape(3Dstructure)andportionsize(volume).
+3.2.1 Phase-I:VolumeAccuracy
+In the first phase, the Mean Absolute Percentage Error (MAPE) is used to evaluate portion size
+accuracy,calculatedasfollows:
+n (cid:12) (cid:12)
+MAPE=
+1 (cid:88)(cid:12) (cid:12)A i−F i(cid:12)
+(cid:12)×100% (1)
+n (cid:12) A (cid:12)
+i
+i=1
+3whereA istheactualvolume(inml)ofthei-thfooditemobtainedfromthescanned3Dfoodmesh,
+i
+andF isthevolumecalculatedfromthereconstructed3Dmesh.
+i
+3.2.2 Phase-II:ShapeAccuracy
+TeamsthatperformwellinPhase-Iareaskedtosubmitcomplete3Dmeshfilesforeachfooditem.
+Thisphaseinvolvesseveralstepstoensureprecisionandfairness:
+• ModelVerification: SubmittedmodelsarecheckedagainstthefinalPhase-Isubmissionsfor
+consistency,andvisualinspectionsareconductedtopreventruleviolations.
+• ModelAlignment: Participantsreceivegroundtruth3Dmodelsandascripttocomputethe
+finalChamferdistance. Theymustaligntheirmodelswiththegroundtruthandpreparea
+transformationmatrixforeachsubmittedobject. ThefinalChamferdistanceiscalculated
+usingthesemodelsandmatrices.
+• Chamfer Distance Calculation: Shape accuracy is assessed using the Chamfer distance
+metric. GiventwopointsetsX andY,theChamferdistanceisdefinedas:
+1 (cid:88) 1 (cid:88)
+d (X,Y)= min∥x−y∥2+ min∥x−y∥2 (2)
+CD |X| y∈Y 2 |Y| x∈X 2
+x∈X y∈Y
+Thismetricoffersacomprehensivemeasureofsimilaritybetweenthereconstructed3Dmodelsand
+thegroundtruth. ThefinalrankingisdeterminedbycombiningscoresfrombothPhase-I(volume
+accuracy)andPhase-II(shapeaccuracy). NotethatafterthePhase-Ievaluation,qualityissueswere
+foundwiththedataforobject12(steak)andobject15(chickennugget),sotheseitemswereexcluded
+fromthefinaloverallevaluation.
+4 FirstPlaceTeam-VolETA
+4.1 Methodology
+Theteam’sresearchemploysmulti-viewreconstructiontogeneratedetailedfoodmeshesandcalculate
+precisefoodvolumes.
+4.1.1 Overview
+Theteam’smethodintegratescomputervisionanddeeplearningtoaccuratelyestimatefoodvolume
+fromRGBDimagesandmasks. Keyframeselectionensuresdataquality,supportedbyperceptual
+hashingandblurdetection. Cameraposeestimationandobjectsegmentationpavethewayforneural
+surfacereconstruction,creatingdetailedmeshesforvolumeestimation. Refinementsteps,including
+isolatedpieceremovalandscalingfactoradjustments,enhanceaccuracy. Thisapproachprovidesa
+thoroughsolutionforaccuratefoodvolumeassessment,withpotentialusesinnutritionanalysis.
+4.1.2 TheTeam’sProposal: VolETA
+Theteamstartsbyacquiringinputdata,specificallyRGBDimagesandcorrespondingfoodobject
+masks. The RGBD images, denoted as I = {I }n , where n is the total number of frames,
+D Di i=1
+providedepthinformationalongsideRGBimages. Thefoodobjectmasks,{Mf}n ,helpidentify
+i i=1
+regionsofinterestwithintheseimages.
+Next, the team selects keyframes. From the set {I }n , keyframes {IK}k ⊆ {I }n are
+Di i=1 j j=1 Di i=1
+chosen. A method is implemented to detect and remove duplicate and blurry images, ensuring
+high-qualityframes. ThisinvolvesapplyingaGaussianblurringkernelfollowedbythefastFourier
+transformmethod. Near-ImageSimilarityusesperceptualhashingandHammingdistancethreshold-
+ingtodetectsimilarimagesandretainoverlappingones. Duplicatesandblurryimagesareexcluded
+tomaintaindataintegrityandaccuracy.
+Usingtheselectedkeyframes{IK}k ,theteamestimatescameraposesthroughamethodcalled
+j j=1
+PixSfM,whichinvolvesextractingfeaturesusingSuperPoint,matchingthemwithSuperGlue,and
+refining them. The outputs are the camera poses {C }k , crucial for understanding the scene’s
+j j=1
+spatiallayout.
+4In parallel, the team uses a tool called SAM for reference object segmentation. SAM segments
+thereferenceobjectwithauser-providedprompt,producingareferenceobjectmaskMR foreach
+keyframe. This mask helps track the reference object across all frames. The XMem++ method
+extendsthereferenceobjectmaskMRtoallframes,creatingacomprehensivesetofreferenceobject
+masks{MR}n . Thisensuresconsistentreferenceobjectidentificationthroughoutthedataset.
+i i=1
+TocreateRGBAimages,theteamcombinesRGBimages,referenceobjectmasks{MR}n ,and
+i i=1
+foodobjectmasks{MF}n . Thisstep,denotedas{IR}n ,integratesvariousdatasourcesintoa
+i i=1 i i=1
+unifiedformatforfurtherprocessing.
+TheteamconvertstheRGBAimages{IR}n andcameraposes{C }k intomeaningfulmetadata
+i i=1 j j=1
+andmodeleddataD . Thistransformationfacilitatesaccuratescenereconstruction.
+m
+ThemodeleddataD isinputintoNeuS2formeshreconstruction. NeuS2generatescolorfulmeshes
+m
+{Rf,Rr}forthereferenceandfoodobjects,providingdetailed3Drepresentations.Theteamusesthe
+"RemoveIsolatedPieces"techniquetorefinethemeshes. Giventhatthescenescontainonlyonefood
+item,thediameterthresholdissetto5%ofthemeshsize. Thismethoddeletesisolatedconnected
+componentswithdiameterslessthanorequalto5%,resultinginacleanedmesh{RCf,RCr}. This
+stepensuresthatonlysignificantpartsofthemeshareretained.
+TheteammanuallyidentifiesaninitialscalingfactorS usingthereferencemeshviaMeshLab. This
+factorisfine-tunedtoS usingdepthinformationandfoodandreferencemasks,ensuringaccurate
+f
+scalingrelativetoreal-worlddimensions. Finally,thefine-tunedscalingfactorS isappliedtothe
+f
+cleanedfoodmeshRCf, producingthefinalscaledfoodmeshRFf. Thisstepculminatesinan
+accuratelyscaled3Drepresentationofthefoodobject,enablingprecisevolumeestimation.
+4.1.3 Detectingthescalingfactor
+Generally,3Dreconstructionmethodsproduceunitlessmeshesbydefault. Toaddressthis,theteam
+manuallydeterminesthescalingfactorbymeasuringthedistanceforeachblockofthereference
+objectmesh. Theaverageofallblocklengthsl iscalculated,whiletheactualreal-worldlengthis
+avg
+constantatl =0.012meters. ThescalingfactorS =l /l isappliedtothecleanfoodmesh
+real real avg
+RCf,resultinginthefinalscaledfoodmeshRFf inmeters.
+Theteamusesdepthinformationalongwithfoodandreferenceobjectmaskstovalidatethescaling
+factors. ThemethodforassessingfoodsizeinvolvesusingoverheadRGBimagesforeachscene.
+Initially,thepixel-per-unit(PPU)ratio(inmeters)isdeterminedusingthereferenceobject. Subse-
+quently,thefoodwidth(f )andlength(f )areextractedusingafoodobjectmask. Todeterminethe
+w l
+foodheight(f ),atwo-stepprocessisfollowed. First,binaryimagesegmentationisperformedusing
+h
+theoverheaddepthandreferenceimages,yieldingasegmenteddepthimageforthereferenceobject.
+The average depth is then calculated using the segmented reference object depth (d ). Similarly,
+r
+employing binary image segmentation with an overhead food object mask and depth image, the
+averagedepthforthesegmentedfooddepthimage(d )iscomputed. Theestimatedfoodheightf is
+f h
+theabsolutedifferencebetweend andd . ToassesstheaccuracyofthescalingfactorS,thefood
+r f
+boundingboxvolume(f ×f ×f )×PPU iscomputed. Theteamevaluatesifthescalingfactor
+w l h
+S generatesafoodvolumeclosetothispotentialvolume,resultinginS . Table2liststhescaling
+fine
+factors,PPU,2Dreferenceobjectdimensions,3Dfoodobjectdimensions,andpotentialvolume.
+Forone-shot3Dreconstruction,theteamusesOne-2-3-45toreconstructa3Dmodelfromasingle
+RGBAviewinputafterapplyingbinaryimagesegmentationtobothfoodRGBandmaskimages.
+Isolatedpiecesareremovedfromthegeneratedmesh,andthescalingfactorS,whichisclosertothe
+potentialvolumeofthecleanmesh,isreused.
+4.2 ExperimentalResults
+4.2.1 Implementationsettings
+ExperimentswereconductedusingtwoGPUs: GeForceGTX1080Ti/12GandRTX3060/6G.The
+Hammingdistancefornearimagesimilaritywassetto12. ForGaussiankernelradius,evennumbers
+intherange[0...30]wereusedfordetectingblurryimages. Thediameterforremovingisolatedpieces
+wassetto5%. NeuS2wasrunfor15,000iterationswithameshresolutionof512x512,aunitcube
+"aabbscale"of1,"scale"of0.15,and"offset"of[0.5,0.5,0.5]foreachfoodscene.
+54.2.2 VolETAResults
+Theteamextensivelyvalidatedtheirapproachonthechallengedatasetandcomparedtheirresults
+withgroundtruthmeshesusingMAPEandChamferdistancemetrics. Theteam’sapproachwas
+appliedseparatelytoeachfoodscene. Aone-shotfoodvolumeestimationapproachwasusedif
+thenumberofkeyframeskequaled1;otherwise,afew-shotfoodvolumeestimationwasapplied.
+Notably,thekeyframeselectionprocesschose34.8%ofthetotalframesfortherestofthepipeline,
+showingtheminimumframeswiththehighestinformation.
+Table2: ListofExtractedInformationUsingRGBDandMasks
+Level Id Label S PPU R ×R (f ×f ×f )
+f w l w l h
+1 Strawberry 0.08955223881 0.01786 320×360 (238×257×2.353)
+2 Cinnamonbun 0.1043478261 0.02347 236×274 (363×419×2.353)
+3 Porkrib 0.1043478261 0.02381 246×270 (435×778×1.176)
+Easy 4 Corn 0.08823529412 0.01897 291×339 (262×976×2.353)
+5 Frenchtoast 0.1034482759 0.02202 266×292 (530×581×2.53)
+6 Sandwich 0.1276595745 0.02426 230×265 (294×431×2.353)
+7 Burger 0.1043478261 0.02435 208×264 (378×400×2.353)
+8 Cake 0.1276595745 0.02143 256×300 (298×310×4.706)
+9 Blueberrymuffin 0.08759124088 0.01801 291×357 (441×443×2.353)
+10 Banana 0.08759124088 0.01705 315×377 (446×857×1.176)
+Medium 11 Salmon 0.1043478261 0.02390 242×269 (201×303×1.176)
+13 Burrito 0.1034482759 0.02372 244×271 (251×917×2.353)
+14 Frankfurtsandwich 0.1034482759 0.02115 266×304 (400×1022×2.353)
+16 Everythingbagel 0.08759124088 0.01747 306×368 (458×134×1.176)
+Hard 17 Croissant 0.1276595745 0.01751 319×367 (395×695×2.176)
+18 Shrimp 0.08759124088 0.02021 249×318 (186×95×0.987)
+19 Waffle 0.01034482759 0.01902 294×338 (465×537×0.8)
+20 Pizza 0.01034482759 0.01913 292×336 (442×651×1.176)
+Afterfindingkeyframes,PixSfMestimatedtheposesandpointcloud.Aftergeneratingscaledmeshes,
+theteamcalculatedvolumesandChamferdistancewithandwithouttransformationmetrics. Meshes
+wereregisteredwithgroundtruthmeshesusingICPtoobtaintransformationmetrics.
+Table3presentsquantitativecomparisonsoftheteam’svolumesandChamferdistancewithand
+withoutestimatedtransformationmetricsfromICP.Foroverallmethodperformance,Table4shows
+theMAPEandChamferdistancewithandwithouttransformationmetrics.
+Additionally,qualitativeresultsonone-andfew-shot3Dreconstructionfromthechallengedataset
+areshown. Themodelexcelsintexturedetails,artifactcorrection,missingdatahandling,andcolor
+adjustmentacrossdifferentsceneparts.
+Limitations: Despitepromisingresults,severallimitationsneedtobeaddressedinfuturework:
+• Manualprocesses: Thecurrentpipelineincludesmanualstepslikeprovidingsegmentation
+promptsandidentifyingscalingfactors,whichshouldbeautomatedtoenhanceefficiency.
+• Input requirements: The method requires extensive input information, including food
+masksanddepthdata. Streamliningtheseinputswouldsimplifytheprocessandincrease
+applicability.
+• Complexbackgroundsandobjects: Themethodhasnotbeentestedinenvironmentswith
+complexbackgroundsorhighlyintricatefoodobjects.
+• Capturing complexities: The method has not been evaluated under different capturing
+complexities,suchasvaryingdistancesandcameraspeeds.
+• Pipelinecomplexity: Forone-shotneuralrendering,theteamcurrentlyusesOne-2-3-45.
+Theyaimtouseonlythe2Ddiffusionmodel,Zero123,toreducecomplexityandimprove
+efficiency.
+6Table3: QuantitativeComparisonwithGroundTruthUsingChamferDistance
+L Id Team’sVol. GTVol. Ch. w/t.m Ch. w/ot.m
+1 40.06 38.53 1.63 85.40
+2 216.9 280.36 7.12 111.47
+3 278.86 249.67 13.69 172.88
+E 4 279.02 295.13 2.03 61.30
+5 395.76 392.58 13.67 102.14
+6 205.17 218.44 6.68 150.78
+7 372.93 368.77 4.70 66.91
+8 186.62 173.13 2.98 152.34
+9 224.08 232.74 3.91 160.07
+10 153.76 163.09 2.67 138.45
+M 11 80.4 85.18 3.37 151.14
+13 363.99 308.28 5.18 147.53
+14 535.44 589.83 4.31 89.66
+16 163.13 262.15 18.06 28.33
+H 17 224.08 181.36 9.44 28.94
+18 25.4 20.58 4.28 12.84
+19 110.05 108.35 11.34 23.98
+20 130.96 119.83 15.59 31.05
+Table4: QuantitativeComparisonwithGroundTruthUsingMAPEandChamferDistance
+MAPE Ch. w/t.m Ch. w/ot.m
+(%) sum mean sum mean
+10.973 0.130 0.007 1.715 0.095
+5 SecondPlaceTeam-ININ-VIAUN
+5.1 Methodology
+Thissectiondetailstheteam’sproposednetwork,illustratingthestep-by-stepprocessfromoriginal
+imagestofinalmeshmodels.
+5.1.1 Scalefactorestimation
+TheprocedureforestimatingthescalefactoratthecoordinatelevelisillustratedinFigure9. The
+teamadherestoamethodinvolvingcornerprojectionmatching. Specifically,utilizingtheCOLMAP
+densemodel,theteamacquirestheposeofeachimagealongwithdensepointclouddata. Forany
+givenimageimg anditsextrinsicparameters[R|t] ,theteaminitiallyperformsthreshold-based
+k k
+cornerdetection,settingthethresholdat240. Thisstepallowsthemtoobtainthepixelcoordinates
+ofalldetectedcorners. Subsequently,usingtheintrinsicparameterskandtheextrinsicparameters
+[R|t] , the point cloud is projected onto the image plane. Based on the pixel coordinates of the
+k
+corners,theteamcanidentifytheclosestpointcoordinatesPk foreachcorner,whereirepresentsthe
+i
+indexofthecorner. Thus,theycancalculatethedistancebetweenanytwocornersasfollows:
+Dk =(Pk−Pk)2 ∀i̸=j (3)
+ij i j
+Todeterminethefinalcomputedlengthofeachcheckerboardsquareinimagek,theteamtakesthe
+minimumvalueofeachrowofthematrixDk (excludingthediagonal)toformthevectordk. The
+medianofthisvectoristhenused. ThefinalscalecalculationformulaisgivenbyEquation4,where
+0.012representstheknownlengthofeachsquare(1.2cm):
+0.012
+scale= (4)
+(cid:80)n med(dk)
+i=1
+75.1.2 3DReconstruction
+The3Dreconstructionprocess,depictedinFigure10,involvestwodifferentpipelinestoaccommodate
+variationsininputviewpoints. Thefirstfifteenobjectsareprocessedusingonepipeline,whilethe
+lastfivesingle-viewobjectsareprocessedusinganother.
+Fortheinitialfifteenobjects,theteamusesCOLMAPtoestimateposesandsegmentthefoodusing
+theprovidedsegmentmasks. Advancedmulti-view3Dreconstructionmethodsarethenappliedto
+reconstructthesegmentedfood. Theteamemploysthreedifferentreconstructionmethods:COLMAP,
+DiffusioNeRF,andNeRF2Mesh. Theyselectthebestreconstructionresultsfromthesemethodsand
+extractthemesh. Theextractedmeshisscaledusingtheestimatedscalefactor,andoptimization
+techniquesareappliedtoobtainarefinedmesh.
+Forthelastfivesingle-viewobjects,theteamexperimentswithseveralsingle-viewreconstruction
+methods,includingZero123,Zero123++,One2345,ZeroNVS,andDreamGaussian. Theychoose
+ZeroNVS to obtain a 3D food model consistent with the distribution of the input image. The
+intrinsiccameraparametersfromthefifteenthobjectareused,andanoptimizationmethodbased
+on reprojection error refines the extrinsic parameters of the single camera. Due to limitations in
+single-viewreconstruction,depthinformationfromthedatasetandthecheckerboardinthemonocular
+imageareusedtodeterminethesizeoftheextractedmesh. Finally, optimizationtechniquesare
+appliedtoobtainarefinedmesh.
+5.1.3 Meshrefinement
+Duringthe3DReconstructionphase,itwasobservedthatthemodel’sresultsoftensufferedfromlow
+qualityduetoholesontheobject’ssurfaceandsubstantialnoise,asshowninFigure11.
+Toaddresstheholes,MeshFix,anoptimizationmethodbasedoncomputationalgeometry,isem-
+ployed. For surface noise, Laplacian Smoothing is used for mesh smoothing operations. The
+LaplacianSmoothingmethodadjuststhepositionofeachvertextotheaverageofitsneighboring
+vertices:
+ 
+1 (cid:88)
+V(new) =V(old)+λ V(old)−V(old)  (5)
+i i |N(i)| j i
+j∈N(i)
+Intheirimplementation,thesmoothingfactorλissetto0.2,and10iterationsareperformed.
+5.2 ExperimentalResults
+5.2.1 Estimatedscalefactor
+ThescalefactorsestimatedusingthedescribedmethodareshowninTable5. Eachimageandthe
+correspondingreconstructed3Dmodelyieldascalefactor,andthetablepresentstheaveragescale
+factorforeachobject.
+5.2.2 Reconstructedmeshes
+TherefinedmeshesobtainedusingthedescribedmethodsareshowninFigure12. Thepredicted
+modelvolumes,groundtruthmodelvolumes,andthepercentageerrorsbetweenthemarepresented
+inTable6.
+5.2.3 Alignment
+Theteamdesignsamulti-stagealignmentmethodforevaluatingreconstructionquality. Figure13
+illustratesthealignmentprocessforObject14. First,thecentralpointsofboththepredictedand
+groundtruthmodelsarecalculated,andthepredictedmodelismovedtoalignwiththecentralpoint
+ofthegroundtruthmodel. Next,ICPregistrationisperformedforfurtheralignment,significantly
+reducingtheChamferdistance. Finally,gradientdescentisusedforadditionalfine-tuningtoobtain
+thefinaltransformationmatrix.
+ThetotalChamferdistancebetweenall18predictedmodelsandthegroundtruthsis0.069441169.
+8Table5: EstimatedScaleFactors
+ObjectIndex FoodItem ScaleFactor
+1 Strawberry 0.060058
+2 Cinnamonbun 0.081829
+3 Porkrib 0.073861
+4 Corn 0.083594
+5 Frenchtoast 0.078632
+6 Sandwich 0.088368
+7 Burger 0.103124
+8 Cake 0.068496
+9 Blueberrymuffin 0.059292
+10 Banana 0.058236
+11 Salmon 0.083821
+13 Burrito 0.069663
+14 Hotdog 0.073766
+Table6: MetricofVolume
+ObjectIndex PredictedVolume GroundTruth ErrorPercentage
+1 44.51 38.53 15.52
+2 321.26 280.36 14.59
+3 336.11 249.67 34.62
+4 347.54 295.13 17.76
+5 389.28 392.58 0.84
+6 197.82 218.44 9.44
+7 412.52 368.77 11.86
+8 181.21 173.13 4.67
+9 233.79 232.74 0.45
+10 160.06 163.09 1.86
+11 86.0 85.18 0.96
+13 334.7 308.28 8.57
+14 517.75 589.83 12.22
+16 176.24 262.15 32.77
+17 180.68 181.36 0.37
+18 13.58 20.58 34.01
+19 117.72 108.35 8.64
+20 117.43 119.83 20.03
+6 Best3DMeshReconstructionTeam-FoodRiddle
+6.1 Methodology
+Toachievehigh-fidelityfoodmeshreconstruction,theteamdevelopedtwoproceduralpipelinesas
+depictedinFigure14. Forsimpleandmediumcomplexitycases,theyemployedastructure-from-
+motionstrategytoascertaintheposeofeachimage,followedbymeshreconstruction. Subsequently,
+a sequence of post-processing steps was implemented to recalibrate the scale and improve mesh
+quality. Forcasesinvolvingonlyasingleimage,theteamutilizedimagegenerationtechniquesto
+facilitatemodelgeneration.
+6.1.1 Multi-ViewReconstruction
+ForStructurefromMotion(SfM),theteamenhancedtheadvancedCOLMAPmethodbyintegrating
+SuperPointandSuperGluetechniques. Thisintegrationsignificantlyaddressedtheissueoflimited
+keypointsinsceneswithminimaltexture,asillustratedinFigure15.
+Inthemeshreconstructionphase,theteam’sapproachbuildsupon2DGaussianSplatting,which
+employsadifferentiable2DGaussianrendererandincludesregularizationtermsfordepthdistortion
+9and normal consistency. The Truncated Signed Distance Function (TSDF) results are utilized to
+produceadensepointcloud.
+Duringpost-processing,theteamappliedfilteringandoutlierremovalmethods,identifiedtheoutline
+ofthesupportingsurface, andprojectedthelowermeshverticesontothissurface. Theyutilized
+thereconstructedcheckerboardtocorrectthemodel’sscaleandemployedPoissonreconstructionto
+createacomplete,watertightmeshofthesubject.
+6.1.2 Single-ViewReconstruction
+For3Dreconstructionfromasingleimage,theteamutilizedadvancedmethodssuchasLGM,Instant
+Mesh,andOne-2-3-45togenerateaninitialmesh. Thisinitialmeshwasthenrefinedinconjunction
+withdepthstructureinformation.
+Toadjustthescale, theteamestimatedtheobject’slengthusingthecheckerboardasareference,
+assumingthattheobjectandthecheckerboardareonthesameplane. Theythenprojectedthe3D
+objectbackontotheoriginal2Dimagetoobtainamoreprecisescalefortheobject.
+6.2 ExperimentalResults
+Through a process of nonlinear optimization, the team sought to identify a transformation that
+minimizestheChamferdistancebetweentheirmeshandthegroundtruthmesh. Thisoptimization
+aimedtoalignthetwomeshesascloselyaspossibleinthree-dimensionalspace. Uponcompletion
+of this process, the average Chamfer dis- tance across the final reconstructions of the 20 objects
+amountedto0.0032175meters. AsshowninTable7,TeamFoodRiddleachievedthebestscoresfor
+bothmulti-viewandsingle-viewreconstructions,outperformingotherteamsinthecompetition.
+Table7: TotalErrorsforDifferentTeamsonMulti-viewandSingle-viewData
+Team Multi-view(1-14) Single-view(16-20)
+FoodRiddle 0.036362 0.019232
+ININ-VIAUN 0.041552 0.027889
+VolETA 0.071921 0.058726
+7 Conclusion
+This report examines and compiles the techniques and findings from the MetaFood Workshop
+challengeon3DFoodReconstruction. Thechallengesoughttoenhance3Dreconstructionmethods
+byconcentratingonfooditems,tacklingthedistinctdifficultiespresentedbyvariedtextures,reflective
+surfaces,andintricategeometriescommoninculinarysubjects.
+Thecompetitioninvolved20diversefooditems,capturedundervariousconditionsandwithdiffering
+numbersofinputimages,specificallydesignedtochallengeparticipantsincreatingrobustreconstruc-
+tionmodels. Theevaluationwasbasedonatwo-phaseprocess,assessingbothportionsizeaccuracy
+throughMeanAbsolutePercentageError(MAPE)andshapeaccuracyusingtheChamferdistance
+metric.
+Ofallparticipatingteams,threereachedthefinalsubmissionstage,presentingarangeofinnovative
+solutions. TeamVolETAsecuredfirstplacewiththebestoverallperformanceinbothPhase-Iand
+Phase-II, followed by team ININ-VIAUN in second place. Additionally, the FoodRiddle team
+exhibited superior performance in Phase-II, highlighting a competitive and high-caliber field of
+entriesfor3Dmeshreconstruction. Thechallengehassuccessfullyadvancedthefieldof3Dfood
+reconstruction,demonstratingthepotentialforaccuratevolumeestimationandshapereconstruction
+in nutritional analysis and food presentation applications. The novel methods developed by the
+participatingteamsestablishastrongfoundationforfutureresearchinthisarea,potentiallyleading
+tomorepreciseanduser-friendlyapproachesfordietaryassessmentandmonitoring.
+10

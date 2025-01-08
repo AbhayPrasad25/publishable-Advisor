@@ -1,0 +1,366 @@
+Examining the Convergence of Denoising Diffusion Probabilistic
+Models: A Quantitative Analysis
+Abstract
+Deepgenerativemodels,particularlydiffusionmodels,areasignificantfamilywithindeeplearning. Thisstudy
+providesapreciseupperlimitfortheWassersteindistancebetweenalearneddistributionbyadiffusionmodel
+andthetargetdistribution. Incontrasttoearlierresearch,thisanalysisdoesnotrelyonpresumptionsregarding
+thelearnedscorefunction. Furthermore,thefindingsareapplicabletoanydata-generatingdistributionswithin
+restrictedinstancespaces,eventhoselackingadensityrelativetotheLebesguemeasure,andtheupperlimitisnot
+exponentiallydependentontheambientspacedimension. Theprimaryfindingexpandsuponrecentresearchby
+Mbackeetal. (2023),andtheproofspresentedarefundamental.
+1 Introduction
+Diffusionmodels,alongsidegenerativeadversarialnetworksandvariationalautoencoders(VAEs),areamongthemostinfluential
+familiesofdeepgenerativemodels. Thesemodelshavedemonstratedremarkableempiricalresultsingeneratingimagesandaudio,
+aswellasinvariousotherapplications.
+Twoprimarymethodsexistfordiffusionmodels: denoisingdiffusionprobabilisticmodels(DDPMs)andscore-basedgenerative
+models (SGMs). DDPMs incrementally convert samples from the desired distribution into noise via a forward process, while
+simultaneouslytrainingabackwardprocesstoreversethistransformation,enablingthecreationofnewsamples. Conversely,SGMs
+employscore-matchingmethodstoapproximatethescorefunctionofthedata-generatingdistribution,subsequentlygeneratingnew
+samplesthroughLangevindynamics. Recognizingthatreal-worlddistributionsmightlackadefinedscorefunction,addingvarying
+noiselevelstotrainingsamplestoencompasstheentireinstancespaceandtraininganeuralnetworktoconcurrentlylearnthescore
+functionforallnoiselevelshasbeenproposed.
+AlthoughDDPMsandSGMsmayinitiallyseemdistinct,ithasbeendemonstratedthatDDPMsimplicitlyapproximatethescore
+function,withthesamplingprocessresemblingLangevindynamics.Moreover,aunifiedperspectiveofbothmethodsusingstochastic
+differentialequations(SDEs)hasbeenderived. TheSGMcanbeviewedasadiscretizationofBrownianmotion,andtheDDPMasa
+discretizationofanOrnstein-Uhlenbeckprocess. Consequently,bothDDPMsandSGMsarecommonlyreferredtoasSGMsinthe
+literature. Thisexplainswhypriorresearchinvestigatingthetheoreticalaspectsofdiffusionmodelshasadoptedthescore-based
+framework,necessitatingassumptionsabouttheeffectivenessofthelearnedscorefunction.
+Inthisresearch,adifferentstrategyisemployed,applyingmethodscreatedforVAEstoDDPMs,whichcanbeviewedashierarchical
+VAEswithfixedencoders. Thismethodenablesthederivationofquantitative,Wasserstein-basedupperboundswithoutmaking
+assumptionsaboutthedatadistributionorthelearnedscorefunction, andwithsimpleproofsthatdonotneedtheSDEtoolkit.
+Furthermore,theboundspresentedheredonotinvolveanycomplexdiscretizationsteps,astheforwardandbackwardprocessesare
+considereddiscrete-timefromthebeginning,ratherthanbeingviewedasdiscretizationsofcontinuous-timeprocesses.
+1.1 RelatedWorks
+TherehasbeenanincreasingamountofresearchaimedatprovidingtheoreticalfindingsontheconvergenceofSGMs. However,
+thesestudiesfrequentlydependonrestrictiveassumptionsregardingthedata-generatingdistribution,producenon-quantitativeupper
+bounds,orexhibitexponentialdependenciesoncertainparameters. Thisworksuccessfullycircumventsallthreeoftheselimitations.
+Someboundsarebasedonveryrestrictiveassumptionsaboutthedata-generatingdistribution,suchaslog-Sobolevinequalities,
+whichareunrealisticforreal-worlddatadistributions. Furthermore,somestudiesestablishupperboundsontheKullback-Leibler
+(KL)divergenceorthetotalvariation(TV)distancebetweenthedata-generatingdistributionandthedistributionlearnedbythe
+diffusionmodel;however,unlessstrongassumptionsaremadeaboutthesupportofthedata-generatingdistribution,KLandTV
+reachtheirmaximumvalues. Suchassumptionsarguablydonotholdforreal-worlddata-generatingdistributions,whicharewidely
+believedtosatisfythemanifoldhypothesis. Otherworkestablishesconditionsunderwhichthesupportoftheinputdistribution
+isequaltothesupportofthelearneddistribution, andgeneralizestheboundtoallf-divergences. AssumingL2accuratescoreestimation,someestablishWassersteindistanceupperboundsunderweakerassumptionsonthedata-generatingdistribution,but
+theirWasserstein-basedboundsarenotquantitative. QuantitativeWassersteindistanceupperboundsunderthemanifoldhypothesis
+havebeenderived,buttheseboundsexhibitexponentialdependenciesonsomeoftheproblemparameters.
+1.2 Ourcontributions
+Inthisstudy,strongassumptionsaboutthedata-generatingdistributionareavoided,andaquantitativeupperboundontheWasserstein
+distanceisestablishedwithoutexponentialdependenciesonproblemparameters,includingtheambientspacedimension. Moreover,
+acommonaspectoftheaforementionedstudiesisthattheirboundsarecontingentontheerrorofthescoreestimator. Accordingto
+some,providingpreciseguaranteesfortheestimationofthescorefunctionischallenging,asitnecessitatesanunderstandingofthe
+non-convextrainingdynamicsofneuralnetworkoptimization,whichiscurrentlybeyondreach. Therefore,upperboundsarederived
+withoutmakingassumptionsaboutthelearnedscorefunction. Instead,theboundpresentedhereisdependentonareconstruction
+losscalculatedoverafiniteindependentandidenticallydistributed(i.i.d.) sample. Intuitively,alossfunctionisdefined,which
+quantifiestheaverageEuclideandistancebetweenasamplefromthedata-generatingdistributionandthereconstructionobtainedby
+samplingnoiseandpassingitthroughthebackwardprocess(parameterizedby0˘3b8). Thismethodisinspiredbypreviousworkon
+VAEs.
+This approach offers numerous benefits: it does not impose restrictive assumptions on the data-generating distribution, avoids
+exponentialdependenciesonthedimension,andprovidesaquantitativeupperboundbasedontheWassersteindistance.Furthermore,
+thismethodbenefitsfromutilizingverystraightforwardandbasicproofs.
+2 Preliminaries
+Throughoutthispaper, lowercaselettersareusedtorepresentbothprobabilitymeasuresandtheirdensitieswithrespecttothe
+Lebesguemeasure, andvariablesareaddedinparenthesestoenhancereadability(e.g., q(x |x )todenoteatime-dependent
+t t−1
+conditionaldistribution). AninstancespaceX,whichisasubsetofRD withtheEuclideandistanceastheunderlyingmetric,and
+atargetdata-generatingdistributionµ∈M+(X)areconsidered. Notethatitisnotassumedthatµhasadensitywithrespectto
+1
+theLebesguemeasure. Additionally,||·||representstheEuclidean(L2)norm,andE isusedasshorthandforE . Given
+p(x) x∼p(x)
+probabilitymeasuresp,q ∈M+(X)andarealnumberk >1,theWassersteindistanceoforderkisdefinedas(Villani,2009):
+1
+(cid:18)(cid:90) (cid:19)1/k
+W (p,q)= inf ||x−y||kdγ(x,y) ,
+k
+γ∈Γ(p,q) X×X
+whereΓ(p,q)denotesthesetofcouplingsofpandq,meaningthesetofjointdistributionsonX×X withrespectivemarginalsp
+andq. Theproductmeasurep⊗qisreferredtoasthetrivialcoupling,andtheWassersteindistanceoforder1issimplyreferredto
+astheWassersteindistance.
+2.1 DenoisingDiffusionModels
+InsteadofemployingtheSDEframework,diffusionmodelsarepresentedusingtheDDPMformulationwithdiscrete-timeprocesses.
+Adiffusionmodelconsistsoftwodiscrete-timestochasticprocesses: aforwardprocessandabackwardprocess. Bothprocessesare
+indexedbytime0≤t≤T,wherethenumberoftimestepsT isapredeterminedchoice.
+**Theforwardprocess.**Theforwardprocesstransformsadatapointx ∼µintoanoisedistributionq(x |x )throughasequence
+0 T 0
+ofconditionaldistributionsq(x |x )for1≤t≤T. Itisassumedthattheforwardprocessisdefinedsuchthatforsufficiently
+t t−1
+largeT,thedistributionq(x |x )isclosetoasimplenoisedistributionp(x ),whichisreferredtoasthepriordistribution. For
+T 0 T
+instance,p(x )=N(x ;0,I),thestandardmultivariatenormaldistribution,hasbeenchoseninpreviouswork.
+T T
+**Thebackwardprocess.**ThebackwardprocessisaMarkovprocesswithparametrictransitionkernels. Theobjectiveofthe
+backwardprocessistoperformthereverseoperationoftheforwardprocess: transformingnoisesamplesinto(approximate)samples
+fromthedistributionµ. Followingpreviouswork,itisassumedthatthebackwardprocessisdefinedbyGaussiandistributions
+p (x |x )for2≤t≤T as
+θ t−1 t
+p (x |x )=N(x ;gθ(x ),σ2I),
+θ t−1 t t−1 t t t
+and
+p (x |x )=gθ(x ),
+θ 0 1 1 1
+wherethevarianceparametersσ2 ∈R aredefinedbyafixedschedule,themeanfunctionsgθ :RD →RD arelearnedusinga
+t ≥0 t
+neuralnetwork(withparametersθ)for2≤t≤T,andgθ :RD →X isaseparatefunctiondependentonσ . Inpractice,thesame
+1 1
+networkhasbeenusedforthefunctionsgθ for2≤t≤T,andaseparatediscretedecoderforgθ.
+t 1
+2Generatingnewsamplesfromatraineddiffusionmodelisaccomplishedbysamplingx ∼p (x |x )for1≤t≤T,starting
+t−1 θ t−1 t
+fromanoisevectorx ∼p(x )sampledfromthepriorp(x ).
+T T T
+Thefollowingassumptionismaderegardingthebackwardprocess.
+**Assumption1.**Itisassumedthatforeach1≤t≤T,thereexistsaconstantKθ >0suchthatforeveryx ,x ∈X,
+t 1 2
+||gθ(x )−gθ(x )||≤Kθ||x −x ||.
+t 1 t 2 t 1 2
+Inotherwords,gθ isKθ-Lipschitzcontinuous. ThisassumptionisdiscussedinRemark3.2.
+t t
+2.2 AdditionalDefinitions
+Thedistributionπ (·|x )isdefinedas
+θ 0
+π (·|x )=q(x |x )p (x |x )p (x |x )...p (x |x )p (·|x ).
+θ 0 T 0 θ T−1 T θ T−2 T−1 θ 1 2 θ 1
+Intuitively,foreachx ∈X,π (·|x )representsthedistributiononX obtainedbyreconstructingsamplesfromq(x |x )through
+0 θ 0 T 0
+thebackwardprocess. Anotherwaytointerpretthisdistributionisthatforanyfunctionf :X →R,thefollowingequationholds:
+E [f(xˆ )]=E E ...E E [f(xˆ )].
+πθ(xˆ0|x0) 0 q(xT|x0) pθ(xT−1|xT) pθ(x1|x2) pθ(xˆ0|x1) 0
+GivenafinitesetS ={x1,...,xn}i.i.d. ∼µ,theregenerateddistributionisdefinedasthefollowingmixture:
+0 0
+n
+1 (cid:88)
+µθ = π (·|xi).
+n n θ 0
+i=1
+This definition is analogous to the empirical regenerated distribution defined for VAEs. The distribution on X learned by the
+diffusionmodelisdenotedasπ (·)anddefinedas
+θ
+π (·)=p(x )p (x |x )p (x |x )...p (x |x )p (·|x ).
+θ T θ T−1 T θ T−2 T−1 θ 1 2 θ 1
+Inotherwords,foranyfunctionf :X →R,theexpectationoff withrespecttoπ (·)is
+θ
+E [f(xˆ )]=E E ...E E [f(xˆ )].
+πθ(xˆ0) 0 p(xT) pθ(xT−1|xT) pθ(x1|x2) pθ(xˆ0|x1) 0
+Hence, both π (·) and π (·|x ) are defined using the backward process, with the difference that π (·) starts with the prior
+θ θ 0 θ
+p(x )=N(x ;0,I),whileπ (·|x )startswiththenoisedistributionq(x |x ).
+T T θ 0 T 0
+Finally,thelossfunctionl :X×X →Risdefinedas
+θ
+l (x ,x )=E E ...E E [||x −xˆ ||].
+θ T 0 pθ(xT−1|xT) pθ(xT−2|xT−1) pθ(x1|x2) pθ(xˆ0|x1) 0 0
+Hence,givenanoisevectorx andasamplex ,thelossl (x ,x )representstheaverageEuclideandistancebetweenx andany
+T 0 θ T 0 0
+sampleobtainedbypassingx throughthebackwardprocess.
+T
+2.3 OurApproach
+Thegoalistoupper-boundthedistanceW (µ,π (·)). Sincethetriangleinequalityimplies
+1 θ
+W (µ,π (·))≤W (µ,µθ)+W (µθ,π (·)),
+1 θ 1 n 1 n θ
+thedistanceW (µ,π (·))canbeupper-boundedbyupper-boundingthetwoexpressionsontheright-handsideseparately. The
+1 θ
+upperboundonW (µ,µθ)isobtainedusingastraightforwardadaptationofaproof. First,W (µ,µθ)isupper-boundedusingthe
+1 n 1 n
+expectationofthelossfunctionl ,thentheresultingexpressionisupper-boundedusingaPAC-Bayesian-styleexpressiondependent
+θ
+ontheempiricalriskandtheprior-matchingterm.
+TheupperboundonthesecondtermW (µθ,π (·))usesthedefinitionofµθ. Intuitively,thedifferencebetweenπ (·|xi)andπ (·)
+1 n θ n θ 0 θ
+isdeterminedbythecorrespondinginitialdistributions: q(x |xi)andp(x )forπ (·). Hence,ifthetwoinitialdistributionsare
+T 0 T θ
+close,andifthestepsofthebackwardprocessaresmooth(seeAssumption1),thenπ (·|xi)andπ (·)areclosetoeachother.
+θ 0 θ
+33 MainResult
+3.1 TheoremStatement
+Wearenowreadytopresentthemainresult: aquantitativeupperboundontheWassersteindistancebetweenthedata-generating
+distributionµandthelearneddistributionπ (·).
+θ
+**Theorem3.1.**AssumetheinstancespaceX hasfinitediameter∆=sup ||x−x′||<∞,andletλ>0andδ ∈(0,1)be
+x,x′∈X
+realnumbers. Usingthedefinitionsandassumptionsoftheprevioussection,thefollowinginequalityholdswithprobabilityatleast
+1−δovertherandomdrawofS ={x1,...,xn}i.i.d. ∼µ:
+0 0
+1 (cid:88)n 1 (cid:88)n 1 n λ∆2
+W (µ,π (·))≤ E [l (x ,xi)]+ KL(q(x |xi)||p(x ))+ log +
+1 θ n q(xT|xi 0) θ T 0 λn T 0 T λn δ 8n
+i=1 i=1
+(cid:32) T (cid:33)
+(cid:89)
++ Kθ E E [||x −y ||]
+t q(xT|xi 0) p(yT) T T
+t=1
+T (cid:32)t−1 (cid:33)
+(cid:88) (cid:89)
++ Kθ σ E [||ϵ−ϵ′||],
+i t ϵ,ϵ′
+t=2 i=1
+whereϵ,ϵ′ ∼N(0,I)arestandardGaussianvectors.
+**Remark3.1.**Beforepresentingtheproof,letusdiscussTheorem3.1.
+*Becausetheright-handsideoftheequationdependsonaquantitycomputedusingafinitei.i.d. sampleS,theboundholdswith
+high probability with respect to the randomness of S. This is the price we pay for having a quantitative upper bound with no
+exponentialdependenciesonproblemparametersandnoassumptionsonthedata-generatingdistributionµ. *Thefirsttermofthe
+right-handsideistheaveragereconstructionlosscomputedoverthesampleS ={x1,...,xn}. Notethatforeach1≤i≤n,the
+0 0
+expectationofl (x |xi)isonlycomputedwithrespecttothenoisedistributionq(x |xi)definedbyxi itself. Hence,thisterm
+θ T 0 T 0 0
+measureshowwellanoisevectorx ∼q(x |xi)recoverstheoriginalsamplexi usingthebackwardprocess,andaveragesover
+T T 0 0
+thesetS ={x1,...,xn}. *IftheLipschitzconstantssatisfyKθ <1forall1≤t≤T,thenthelargerT is,thesmallertheupper
+0 0 t
+boundgets. ThisisbecausetheproductofKθ’sthenconvergesto0. InRemark3.2below,weshowthattheassumptionthatKθ <1
+t t
+foralltisaquitereasonableone. *Thehyperparameterλcontrolsthetrade-offbetweentheprior-matching(KL)termandthe
+diameterterm∆2. IfKθ <1forall1≤t≤T andT →∞,thentheconvergenceoftheboundlargelydependsonthechoiceofλ.
+t
+Inthatcase,λ∝n1/2leadstofasterconvergence,whileλ∝nleadstoslowerconvergencetoasmallerquantity. Thisisbecause
+theboundstemsfromPAC-Bayesiantheory,wherethistrade-offiscommon. *Thelasttermoftheequationdoesnotdependonthe
+samplesizen. Hence,theupperboundgivenbyTheorem3.1doesnotconvergeto0asn→∞. However,iftheLipschitzfactors
+(Kθ) arealllessthan1,thenthistermcanbeverysmall,especiallyinlow-dimensionalspaces.
+t 1≤t≤T
+3.2 Proofofthemaintheorem
+Thefollowingresultisanadaptationofapreviousresult.
+**Lemma3.2.**Letλ > 0andδ ∈ (0,1)berealnumbers. Withprobabilityatleast1−δ overtherandomnessofthesample
+S ={x1,...,xn}i.i.d. ∼µ,thefollowingholds:
+0 0
+1 (cid:88)n 1 (cid:88)n 1 n λ∆2
+W (µ,µθ)≤ E [l (x ,xi)]+ KL(q(x |xi)||p(x ))+ log + .
+1 n n q(xT|xi 0) θ T 0 λn T 0 T λn δ 8n
+i=1 i=1
+Theproofofthisresultisastraightforwardadaptationofapreviousproof.
+Now,letusfocusourattentiononthesecondtermoftheright-handsideoftheequation,namelyW (µθ,π (·)). Thispartistrickier
+1 n θ
+thanforVAEs,forwhichthegenerativemodel’sdistributionissimplyapushforwardmeasure. Here,wehaveanon-deterministic
+samplingprocesswithT steps.
+Assumption1leadstothefollowinglemmaonthebackwardprocess.
+**Lemma3.3.**Foranygivenx ,y ∈X,wehave
+1 1
+E E [||x −y ||]≤Kθ||x −y ||.
+pθ(x0|x1) pθ(y0|y1) 0 0 1 1 1
+Moreover,if2≤t≤T,thenforanygivenx ,y ∈X,wehave
+t t
+4E E [||x −y ||]≤Kθ||x −y ||+σ E [||ϵ−ϵ′||],
+pθ(xt−1|xt) pθ(yt−1|yt) t−1 t−1 t t t t ϵ,ϵ′
+whereϵ,ϵ′ ∼N(0,I),meaningE isashorthandforE .
+ϵ,ϵ′ ϵ,ϵ′∼N(0,I)
+**Proof.**Forthefirstpart,letx ,y ∈X. Sinceaccordingtotheequationp (x |x )=δ (x )andp (y |y )=δ (y ),
+1 1 θ 0 1 g 1θ(x1) 0 θ 0 1 g 1θ(y1) 0
+then
+E E [||x −y ||]=||gθ(x )−gθ(y )||≤Kθ||x −y ||.
+pθ(x0|x1) pθ(y0|y1) 0 0 1 1 1 1 1 1 1
+Forthesecondpart,let2≤t≤T andx ,y ∈X. Sincep (x |x )=N(x ;gθ(x ),σ2I),thereparameterizationtrickimplies
+t t θ t−1 t t−1 t t t
+thatsamplingx ∼p (x |x )isequivalenttosetting
+t−1 θ t−1 t
+x =gθ(x )+σ ϵ , withϵ ∼N(0,I).
+t−1 t t t t t
+Usingtheaboveequation,thetriangleinequality,andAssumption1,weobtain
+E E [||x −y ||]
+pθ(xt−1|xt) pθ(yt−1|yt) t−1 t−1
+=E [||gθ(x )+σ ϵ −gθ(y )−σ ϵ′||]
+ϵt,ϵ′ t∼N(0,I) t t t t t t t t
+≤E [||gθ(x )−gθ(y )||]+σ E [||ϵ −ϵ′||]
+ϵt,ϵ′ t∼N(0,I) t t t t t ϵt,ϵ′ t∼N(0,I) t t
+≤Kθ||x −y ||+σ E [||ϵ−ϵ′||],
+t t t t ϵ,ϵ′
+whereϵ,ϵ′ ∼N(0,I).
+Next,wecanusetheinequalitiesofLemma3.3toprovethefollowingresult.
+**Lemma3.4.**LetT ≥1. Thefollowinginequalityholds:
+E E E E ...E E [||x −y ||]
+pθ(xT−1|xT) pθ(yT−1|yT) pθ(xT−2|xT−1) pθ(yT−2|yT−1) pθ(x0|x1) pθ(y0|y1) 0 0
+(cid:32) T (cid:33) T (cid:32)t−1 (cid:33)
+(cid:89) (cid:88) (cid:89)
+≤ Kθ ||x −y ||+ Kθ σ E [||ϵ−ϵ′||],
+t T T i t ϵ,ϵ′
+t=1 t=2 i=1
+whereϵ,ϵ′ ∼N(0,I).
+**ProofIdea.**Lemma3.4isprovenbyinductionusingLemma3.3intheinductionstep.
+Usingthetwopreviouslemmas,weobtainthefollowingupperboundonW (µθ,π (·)).
+1 n θ
+**Lemma3.5.**Thefollowinginequalityholds:
+n (cid:32) T (cid:33) T (cid:32)t−1 (cid:33)
+1 (cid:88) (cid:89) (cid:88) (cid:89)
+W (µθ,π (·))≤ Kθ E E [||x −y ||]+ Kθ σ E [||ϵ−ϵ′||],
+1 n θ n t q(xT|xi 0) p(yT) T T i t ϵ,ϵ′
+i=1 t=1 t=2 i=1
+whereϵ,ϵ′ ∼N(0,I).
+**Proof.**UsingthedefinitionofW ,thetrivialcoupling,thedefinitionsofµθ andπ (·),andLemma3.4,wegetthedesiredresult.
+1 n θ
+CombiningLemmas3.2and3.5withthetriangleinequalityyieldsTheorem3.1.
+3.3 SpecialcaseusingtheforwardprocessofHoetal. (2020)
+Theorem 3.1 establishes a general upper bound that holds for any forward process, as long as the backward process satisfies
+Assumption1. Inthissection,wespecializethestatementofthetheoremtotheparticularcaseoftheforwardprocessdefinedin
+previouswork.
+LetX ⊆RD. TheforwardprocessisaGauss-Markovprocesswithtransitiondensitiesdefinedas
+√
+q(x |x )=N(x ; α x ,(1−α )I),
+t t−1 t t t−1 t
+whereα ,...,α isafixednoiseschedulesuchthat0<α <1forallt. Thisdefinitionimpliesthatateachtimestep1≤t≤T,
+1 T t
+5√ (cid:89)t
+q(x |x )=N(x ; α¯ x ,(1−α¯ )I), withα¯ = α .
+t 0 t t 0 t t i
+i=1
+Theoptimizationobjectivetotrainthebackwardprocessensuresthatforeachtimestept,thedistributionp (x |x )remainsclose
+θ t−1 t
+totheground-truthdistributionq(x |x ,x )givenby
+t−1 t 0
+q(x |x ,x )=N(x ;µ˜q(x ,x ),σ˜2I),
+t−1 t 0 t−1 t t 0 t
+where
+√ √
+α (1−α¯ ) α¯ (1−α )
+µ˜q(x ,x )= t t−1 x + t−1 t x .
+t t 0 1−α¯ t 1−α¯ 0
+t t
+Now,wediscussAssumption1underthesedefinitions.
+**Remark3.2.**WecangetaglimpseattherangeofKθ foratrainedDDPMbylookingatthedistributionq(x |x ,x ),since
+t t−1 t 0
+p (x |x )isoptimizedtobeascloseaspossibletoq(x |x ,x ).
+θ t−1 t t−1 t 0
+Foragivenx ∼µ,letustakealookattheLipschitznormofx(cid:55)→µ˜q(x,x ). Usingtheaboveequation,wehave
+0 t 0
+√
+α (1−α¯ )
+µ˜q(x ,x )−µ˜q(y ,x )= t t−1 (x −y ).
+t t 0 t t 0 1−α¯ t t
+t
+Hence,x(cid:55)→µ˜q(x,x )isK′-Lipschitzcontinuouswith
+t 0 t
+√
+α (1−α¯ )
+K′ = t t−1 .
+t 1−α¯
+t
+Now,ifα <1forall1≤t≤T,thenwehave1−α¯ >1−α¯ ,whichimpliesK′ <1forall1≤t≤T.
+t t t−1 t
+Remark3.2showsthattheLipschitznormofthemeanfunctionµ˜q(·,x )doesnotdependonx . Indeed,lookingattheprevious
+t √ 0 0
+equation,wecanseethatforanyinitialx ,theLipschitznormK′ = αt(1−α¯t−1) onlydependsonthenoiseschedule,notx itself.
+0 t 1−α¯t 0
+Sincegθ(·,x )isoptimizedtomatchµ˜q(·,x )foreachx inthetrainingset,andallthefunctionsµ˜q(·,x )havethesameLipschitz
+t 0 t 0 0 t 0
+normK′,webelieveitisreasonabletoassumegθ isLipschitzcontinuousaswell. ThisistheintuitionbehindAssumption1.
+t t
+**Theprior-matchingterm.**Withthedefinitionsofthissection,thepriormatchingtermKL(q(x |x )||p(x ))hasthefollowing
+T 0 T
+closedform:
+KL(q(x |x )||p(x ))=
+1(cid:2)
+−Dlog(1−α¯ )−Dα¯ +α¯ ||x
+||2(cid:3)
+.
+T 0 T 2 T T T 0
+**Upper-boundsontheaveragedistancebetweenGaussianvectors.**Ifϵ,ϵ′areD-dimensionalvectorssampledfromN(0,I),then
+√
+E [||ϵ−ϵ′||]≤ 2D.
+ϵ,ϵ′
+√
+Moreover,sinceq(x |x )=N(x ; α¯ x ,(1−α¯ )I)andthepriorp(y )=N(y ;0,I),
+T 0 T T 0 T T T
+(cid:112)
+E E [||x −y ||]≤ α¯ ||x ||2+(2−α¯ )D.
+q(xT|x0) p(yT) T T T 0 T
+**Specialcaseofthemaintheorem.**Withthedefinitionsofthissection,theinequalityofTheorem3.1impliesthatwithprobability
+atleast1−δovertherandomnessof{x1,...,x
+0
+6

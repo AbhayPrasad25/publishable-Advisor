@@ -1,0 +1,340 @@
+Detailed Action Identification in Baseball Game
+Recordings
+Abstract
+ThisresearchintroducesMLB-YouTube,anewandcomplexdatasetcreatedfor
+nuanced activity recognition in baseball videos. This dataset is structured to
+supporttwotypesofanalysis: oneforclassifyingactivitiesinsegmentedvideos
+andanotherfordetectingactivitiesinunsegmented,continuousvideostreams. This
+studyevaluatesseveralmethodsforrecognizingactivities,focusingonhowthey
+capture the temporal organization of activities in videos. This evaluation starts
+with categorizing segmented videos and progresses to applying these methods
+tocontinuousvideofeeds. Additionally,thispaperassessestheeffectivenessof
+different models in the challenging task of forecasting pitch velocity and type
+usingbaseballbroadcastvideos. Thefindingsindicatethatincorporatingtemporal
+dynamicsintomodelsisbeneficialfordetailedactivityrecognition.
+1 Introduction
+Actionrecognition,asignificantproblemincomputervision,findsextensiveuseinsports. Profes-
+sionalsportingeventsareextensivelyrecordedforentertainment,andtheserecordingsareinvaluable
+forsubsequentanalysisbycoaches, scouts, andmediaanalysts. Whilenumerousgamestatistics
+are currently gathered manually, the potential exists for these to be replaced by computer vision
+systems. SystemslikePITCHf/xandStatcasthavebeenemployedbyMajorLeagueBaseball(MLB)
+toautomaticallyrecordpitchspeedandmovement,utilizinganetworkofhigh-speedcamerasand
+radartocollectdetaileddataoneachplayer. Accesstomuchofthisdataisrestrictedfromthepublic
+domain.
+ThispaperintroducesMLB-YouTube,anoveldatasetthatincludesdenselyannotatedframesofactivi-
+tiesextractedfrombroadcastbaseballvideos. Unlikemanycurrentdatasetsforactivityrecognitionor
+detection,ourdatasetemphasizesfine-grainedactivityrecognition. Thedifferencesbetweenactivities
+areoftenminimal,primarilyinvolvingthemovementofasingleindividual,withaconsistentscene
+structureacrossactivities. Thedeterminationofactivityisbasedonasinglecameraperspective. This
+studycomparesvariousmethodsfortemporalfeatureaggregation,bothforclassifyingactivitiesin
+segmentedvideosandfordetectingthemincontinuousvideostreams.
+2 RelatedWork
+Thefieldofactivityrecognitionhasgarneredsubstantialattentionincomputervisionresearch. Initial
+successeswereachievedwithhand-engineeredfeaturessuchasdensetrajectories. Thefocusofmore
+recentstudieshasshiftedtowardstheapplicationofConvolutionalNeuralNetworks(CNNs)for
+activityrecognition. Two-streamCNNarchitecturesutilizebothspatialRGBframesandoptical
+flowframes. Tocapturespatio-temporalcharacteristics,3DXYTconvolutionalmodelshavebeen
+developed. ThedevelopmentoftheseadvancedCNNmodelshasbeensupportedbylargedatasets
+suchasKinetics,THUMOS,andActivityNet.
+Severalstudieshaveinvestigatedtheaggregationoftemporalfeaturesforthepurposeofactivity
+recognition. ResearchhascomparedseveralpoolingtechniquesanddeterminedthatbothLongShort-
+.TermMemorynetworks(LSTMs)andmax-poolingacrossentirevideosyieldedthebestoutcomes. It
+hasbeendiscoveredthatpoolingintervalsfromvaryinglocationsanddurationsisadvantageousfor
+activityrecognition. Itwasdemonstratedthatidentifyingandclassifyingkeysub-eventintervalscan
+leadtobetterperformance.
+Recently,segment-based3DCNNshavebeenemployedtocapturespatio-temporaldataconcurrently
+foractivitydetection. Thesemethodsdependonthe3DCNNtocapturetemporaldynamics,which
+typicallyspanonly16frames. Althoughlonger-termtemporalstructureshavebeenexplored,thiswas
+usuallyaccomplishedwithtemporalpoolingoflocalizedfeaturesor(spatio-)temporalconvolutions
+withextendedfixedintervals. RecurrentNeuralNetworks(RNNs)havealsobeenappliedtorepresent
+transitionsinactivitybetweenframes.
+3 MLB-YouTubeDataset
+Wehavecompiledanextensivedatasetfrom20baseballgamesofthe2017MLBpostseason,available
+onYouTube,totalingover42hoursofvideo. Ourdatasetincludestwomainparts: segmentedvideos
+intended for activity recognition and continuous videos designed for activity classification. The
+dataset’scomplexityisamplifiedbythefactthatitoriginatesfromtelevisedbaseballgames,wherea
+singlecameraperspectiveissharedamongvariousactivities. Additionally,thereisminimalvariance
+in motion and appearance among different activities, such as swinging a bat versus bunting. In
+contrasttodatasetslikeTHUMOSandActivityNet,whichencompassabroadspectrumofactivities
+withdiversesettings,scales,andcameraangles,ourdatasetfeaturesactivitieswhereasingleframe
+mightnotbeadequatetodeterminetheactivity.
+TheminordifferencesbetweenaballandastrikeareillustratedinFigure3. Differentiatingbetween
+theseactionsrequiresidentifyingwhetherthebatterswingsornot, detectingtheumpire’ssignal
+(Figure4)forastrike,ornotingtheabsenceofasignalforaball. Thisisfurthercomplicatedbecause
+thebatterorcatchercanobstructtheumpire,andeachumpirehastheiruniquestyleofsignalinga
+strike.
+Ourdatasetforsegmentedvideoanalysiscomprises4,290clips. Eachclipisannotatedformultiple
+baseballactions,includingswing,hit,ball, strike,andfoul. Giventhatasingleclipmaycontain
+severalactivities,thisisconsideredamulti-labelclassificationtask. Table1presentsthecomplete
+listofactivitiesandtheirrespectivecountswithinthedataset. Additionally,clipsfeaturingapitch
+wereannotatedwiththetypeofpitch(e.g.,fastball,curveball,slider)anditsspeed. Furthermore,a
+collectionof2,983hardnegativeexamples,wherenoactionispresent,wasgathered. Theseinstances
+includeviewsofthecrowd,thefield,orplayersstandingidlybeforeorafterapitch. Examplesof
+activitiesandhardnegativesaredepictedinFigure2.
+Ourcontinuousvideodatasetincludes2,128clips, eachlastingbetween1and2minutes. Every
+frameinthesevideosisannotatedwiththebaseballactivitiesthatoccur. Onaverage,eachcontinuous
+clipcontains7.2activities,amountingtoover15,000activityinstancesintotal.
+Table1: ActivityclassesandtheirinstancecountsinthesegmentedMLB-YouTubedataset.
+Activity Count
+NoActivity 2983
+Ball 1434
+Strike 1799
+Swing 2506
+Hit 1391
+Foul 718
+InPlay 679
+Bunt 24
+HitbyPitch 14
+24 SegmentedVideoRecognitionApproach
+Weinvestigatedifferenttechniquesforaggregatingtemporalfeaturesinsegmentedvideoactivity
+recognition. Insegmentedvideos,theclassificationtaskissimplerbecauseeachframecorrespondsto
+anactivity,eliminatingtheneedforthemodeltoidentifythestartandendofactivities. Ourmethods
+arebasedonaCNNthatgeneratesaper-frameorper-segmentrepresentation,derivedfromstandard
+two-streamCNNsusingdeepCNNslikeI3DorInceptionV3.
+GivenvideofeaturesvofdimensionsT ×D,whereT representsthevideo’stemporallengthandD
+isthefeature’sdimensionality,theusualapproachforfeaturepoolinginvolvesmax-ormean-pooling
+acrossthetemporaldimension,followedbyafully-connectedlayerforvideoclipclassification,as
+depictedinFig. 5(a). Thisapproach,however,yieldsasinglerepresentationfortheentirevideo,
+losing temporal information. An alternative is to employ a fixed temporal pyramid with various
+lengths, as shown in Fig 5(b), dividing the video into intervals of lengths 1/2, 1/4, and 1/8, and
+max-poolingeach. Thepooledfeaturesareconcatenated,creatingaK×Drepresentation,whereK
+isthenumberofintervalsinthetemporalpyramid,andafully-connectedlayerclassifiestheclip.
+Wealsoexplorelearningtemporalconvolutionfilterstoaggregatelocaltemporalstructures. Akernel
+ofsizeL×1isappliedtoeachframe,enablingeachtimesteprepresentationtoincorporateinformation
+fromadjacentframes. Afterapplyingmax-poolingtotheoutputofthetemporalconvolution,afully-
+connectedlayerisusedforclassification,asillustratedinFig. 5(c).
+Whiletemporalpyramidpoolingretainssomestructure,theintervalsarefixedandpredetermined.
+Previousstudieshaveshownthatlearningthesub-intervaltopoolisbeneficialforactivityrecognition.
+These learned intervals are defined by three parameters: a center g, a width σ, and a stride δ,
+parameterizingN Gaussians. GiventhevideolengthT,thepositionsofthestridedGaussiansare
+firstcalculatedas:
+T −(g +1)
+g =0.5− n forn=0,1,...,N −1
+n N −1
+1
+p =g +(t−0.5T +0.5) fort=0,1,...,T −1
+t,n n δ
+Thefiltersarethengeneratedas:
+1
+(cid:18)
+(t−µ
+)2(cid:19)
+F [i,t]= exp − i,m i∈{0,1,...,N −1},t∈{0,1,...,T −1}
+m Z 2σ2
+m m
+whereZ isanormalizationconstant.
+m
+WeapplythesefiltersF totheT ×Dvideorepresentationthroughmatrixmultiplication,yieldingan
+N ×Drepresentationthatservesasinputtoafully-connectedlayerforclassification. Thismethod
+isshowninFig5(d).
+Additionally,wecompareabi-directionalLSTMwith512hiddenunits,usingthefinalhiddenstate
+asinputtoafully-connectedlayerforclassification. Weframeourtasksasmulti-labelclassification
+andtrainthesemodelstominimizebinarycross-entropy:
+(cid:88)
+L(v)= z log(p(c|G(v)))+(1−z )log(1−p(c|G(v)))
+c c
+c
+whereG(v)isthefunctionthatpoolsthetemporalinformation,andz isthegroundtruthlabelfor
+c
+classc.
+5 ActivityDetectioninContinuousVideos
+Detectingactivitiesincontinuousvideosposesagreaterchallenge. Thegoalhereistoclassifyeach
+frameaccordingtotheactivitiesoccurring. Unlikesegmentedvideos, continuousvideosfeature
+multiple sequential activities, often interspersed with frames of inactivity. This necessitates that
+the model learn toidentify the start and end points of activities. As a baseline, wetrain a single
+fully-connectedlayertoserveasaper-frameclassifier,whichdoesnotutilizetemporalinformation
+beyondthatcontainedinthefeatures.
+3Weadaptthemethodsdevelopedforsegmentedvideoclassificationtocontinuousvideosbyimple-
+mentingatemporalslidingwindowapproach. WeselectafixedwindowdurationofLfeatures,apply
+max-poolingtoeachwindow(similartoFig. 5(a)),andclassifyeachpooledsegment. Thisapproach
+isextendedtotemporalpyramidpoolingbydividingthewindowoflengthLintosegmentsoflengths
+L/2,L/4,andL/8,resultingin14segmentsperwindow. Max-poolingisappliedtoeachsegment,
+andthepooledfeaturesareconcatenated,yieldinga14×D-dimensionalrepresentationforeach
+window,whichisthenusedasinputtotheclassifier.
+Fortemporalconvolutionalmodelsincontinuousvideos,wemodifythesegmentedvideoapproachby
+learningatemporalconvolutionalkerneloflengthLandconvolvingitwiththeinputvideofeatures.
+ThisoperationtransformsinputofsizeT ×DintooutputofsizeT ×D,followedbyaper-frame
+classifier. Thisenablesthemodeltoaggregatelocaltemporalinformation.
+Toextendthesub-eventmodeltocontinuousvideos,wefollowasimilarapproachbutsetT =Lin
+Eq. 1,resultinginfiltersoflengthL. TheT×Dvideorepresentationisconvolvedwiththesub-event
+filtersF,producinganN ×D×T-dimensionalrepresentationusedasinputtoafully-connected
+layerforframeclassification.
+Themodelistrainedtominimizeper-framebinaryclassification:
+(cid:88)
+L(v)= z log(p(c|H(v )))+(1−z )log(1−p(c|H(v )))
+t,c t t,c t
+t,c
+wherev istheper-frameorper-segmentfeatureattimet,H(v )istheslidingwindowapplicationof
+t t
+oneofthefeaturepoolingmethods,andz isthegroundtruthclassattimet.
+t,c
+Amethodtolearn’super-events’(i.e.,globalvideocontext)hasbeenintroducedandshowntobe
+effectiveforactivitydetectionincontinuousvideos. Thisapproachinvolveslearningasetoftemporal
+structurefiltersmodeledasN Cauchydistributions. Eachdistributionisdefinedbyacenterx anda
+n
+widthγ . GiventhevideolengthT,thefiltersareconstructedby:
+n
+(T −1)(tanh(x′ )+1)
+x = n
+n 2
+1 γ
+f (t)= n exp(1−2|tanh(γ′)|)
+n Z π((t−x )2+γ2) n
+n n n
+whereZ isanormalizationconstant,t∈{1,2,...,T},andn∈{1,2,...,N}.
+n
+Thefiltersarecombinedwithlearnedper-classsoft-attentionweightsA,andthesuper-eventrepre-
+sentationiscomputedas:
+(cid:88) (cid:88)
+S = A f (t)·v
+c c,n n t
+n t
+where v is the T ×D video representation. These filters enable the model to focus on relevant
+intervalsfortemporalcontext. Thesuper-eventrepresentationisconcatenatedtoeachtimestepand
+usedforclassification. Wealsoexperimentwithcombiningthesuper-andsub-eventrepresentations
+toformathree-levelhierarchyforeventrepresentation.
+6 Experiments
+6.1 ImplementationDetails
+Forourbaseper-segmentCNN,weutilizetheI3Dnetwork,pre-trainedontheImageNetandKinetics
+datasets.I3Dhasachievedstate-of-the-artperformanceonsegmentedvideotasks,providingareliable
+featurerepresentation. Wealsoemployatwo-streamversionofInceptionV3,pre-trainedonImagenet
+andKinetics, asourbaseper-frameCNNforcomparison. InceptionV3waschosenforitsdepth
+comparedtoprevioustwo-streamCNNs. Frameswereextractedat25fps,andTVL1opticalflow
+wascomputedandclippedto[−20,20]. ForInceptionV3,featureswerecomputedevery3frames
+(8fps),whileforI3D,everyframewasused,withI3Dhavingatemporalstrideof8,resultingin
+3featurespersecond(3fps). ModelswereimplementedinPyTorchandtrainedusingtheAdam
+optimizerwithalearningrateof0.01,decayedbyafactorof0.1every10epochs,foratotalof50
+epochs.
+46.2 SegmentedVideoActivityRecognition
+We initially conducted binary pitch/non-pitch classification for each video segment. This task is
+relativelystraightforwardduetothedistinctdifferencesbetweenpitchandnon-pitchframes. The
+results,detailedinTable2,revealminimalvariationacrossdifferentfeaturesormodels.
+Table2: Performanceonsegmentedvideosforbinarypitch/non-pitchclassification.
+Model RGB Flow Two-stream
+InceptionV3 97.46 98.44 98.67
+InceptionV3+sub-events 98.67 98.73 99.36
+I3D 98.64 98.88 98.70
+I3D+sub-events 98.42 98.35 98.65
+6.2.1 Multi-labelClassification
+Weassessedvarioustemporalfeatureaggregationmethodsbycalculatingthemeanaverageprecision
+(mAP)foreachvideoclip,astandardmetricformulti-labelclassification. Table4comparesthe
+performanceofthesemethods. Allmethodssurpassmean/max-pooling,highlightingtheimportance
+ofpreservingtemporalstructureforactivityrecognition.FixedtemporalpyramidpoolingandLSTMs
+showsomeimprovement. Temporalconvolutionoffersamoresignificantperformanceboostbut
+requiressubstantiallymoreparameters(seeTable3). Learningsub-events,asperpreviousresearch,
+yieldsthebestresults. WhileLSTMsandtemporalconvolutionshavebeenusedbefore,theyneed
+moreparametersandperformlesseffectively,likelyduetooverfitting. Moreover,LSTMsnecessitate
+sequentialprocessingofvideofeatures,whereasothermethodscanbefullyparallelized.
+Table 3: Additional parameters required for models when added to the base model (e.g., I3D or
+InceptionV3).
+Model #Parameters
+Max/MeanPooling 16K
+PyramidPooling 115K
+LSTM 10.5M
+TemporalConv 31.5M
+Sub-events 36K
+Table4: MeanAveragePrecision(mAP)resultsonsegmentedvideosformulti-labelclassification.
+Learningsub-intervalsforpoolingisfoundtobecrucialforactivityrecognition.
+Method RGB Flow Two-stream
+Random 16.3 16.3 16.3
+InceptionV3+mean-pool 35.6 47.2 45.3
+InceptionV3+max-pool 47.9 48.6 54.4
+InceptionV3+pyramid 49.7 53.2 55.3
+InceptionV3+LSTM 47.6 55.6 57.7
+InceptionV3+temporalconv 47.2 55.2 56.1
+InceptionV3+sub-events 56.2 62.5 62.6
+I3D+mean-pool 42.4 47.6 52.7
+I3D+max-pool 48.3 53.4 57.2
+I3D+pyramid 53.2 56.7 58.7
+I3D+LSTM 48.2 53.1 53.1
+I3D+temporalconv 52.8 57.1 58.4
+I3D+sub-events 55.5 61.2 61.3
+Table5showstheaverageprecisionforeachactivityclass. Learningtemporalstructureisparticularly
+beneficial for frame-based features (e.g., InceptionV3), which capture less temporal information
+5comparedtosegment-basedfeatures(e.g.,I3D).Sub-eventlearningsignificantlyaidsindetecting
+strikes,hits,foulballs,andhit-by-pitchevents,whichexhibitchangesinvideofeaturespost-event.
+Forinstance,afterahit,thecameraoftentrackstheball’strajectory,whileafterahit-by-pitch,it
+followstheplayertofirstbase,asillustratedinFig. 6andFig. 7.
+Table 5: Per-class average precision for segmented videos using two-stream features in multi-
+label activity classification. Utilizing sub-events to discern temporal intervals of interest proves
+advantageousforactivityrecognition.
+Method Ball Strike Swing Hit Foul InPlay Bunt HitbyPitch
+Random 21.8 28.6 37.4 20.9 11.4 10.3 1.1 4.5
+InceptionV3+max-pool 60.2 84.7 85.9 80.8 40.3 74.2 10.2 15.7
+InceptionV3+sub-events 66.9 93.9 90.3 90.9 60.7 89.7 12.4 29.2
+I3D+max-pool 59.4 90.3 87.7 85.9 48.1 76.1 14.3 18.2
+I3D+sub-events 62.5 91.3 88.5 86.5 47.3 75.9 16.2 21.0
+6.2.2 PitchSpeedRegression
+Estimatingpitchspeedfromvideoframesisanexceptionallydifficultproblem,asitrequiresthe
+networktopinpointthepitch’sstartandend,andderivethespeedfromaminimalsignal.Thebaseball,
+oftenobscuredbythepitcher,travelsatspeedsover100mphandcovers60.5feetinapproximately0.5
+seconds. Initially,withframeratesof8fpsand3fps,only1-2featurescapturedthepitchinmid-air,
+provinginsufficientforspeeddetermination. Utilizingthe60fpsrateavailableinYouTubevideos,we
+recalculatedopticalflowandextractedRGBframesatthishigherrate. Employingafully-connected
+layerwithasingleoutputforpitchspeedpredictionandminimizingtheL1lossbetweenpredicted
+andactualspeeds,weachievedanaverageerrorof3.6mph. Table6comparesdifferentmodels,and
+Fig. 8illustratesthesub-eventslearnedforvariousspeeds.
+Table6: Resultsforpitchspeedregressiononsegmentedvideos,reportingroot-mean-squarederrors.
+Method Two-stream
+I3D 4.3mph
+I3D+LSTM 4.1mph
+I3D+sub-events 3.9mph
+InceptionV3 5.3mph
+InceptionV3+LSTM 4.5mph
+InceptionV3+sub-events 3.6mph
+6.2.3 PitchTypeClassification
+Weconductedexperimentstodeterminethefeasibilityofpredictingpitchtypesfromvideo,atask
+madechallengingbypitchers’effortstodisguisetheirpitchesfrombattersandthesubtledifferences
+betweenpitches,suchasgripandrotation. WeincorporatedposedataextractedusingOpenPose,
+utilizingheatmapsofjointandbodypartlocationsasinputtoanewlytrainedInceptionV3CNN.
+Posefeatureswereconsideredduetovariationsinbodymechanicsbetweendifferentpitches. Our
+datasetincludessixpitchtypes,withresultspresentedinTable7. LSTMsperformedworsethanthe
+baseline,likelyduetooverfitting,whereaslearningsub-eventsprovedbeneficial. Fastballswerethe
+easiesttodetect(68%accuracy),followedbysliders(45%),whilesinkerswerethemostdifficult
+(12%).
+6.3 ContinuousVideoActivityDetection
+Weevaluatemodelsextendedforcontinuousvideosusingper-framemeanaverageprecision(mAP),
+withresultsshowninTable8. Thissettingismorechallengingthansegmentedvideos,requiring
+the model to identify activity start and end times and handle ambiguous negative examples. All
+modelsimproveuponthebaselineper-frameclassification,confirmingtheimportanceoftemporal
+information. Fixedtemporalpyramidpoolingoutperformsmax-pooling,whileLSTMandtemporal
+6Table7: AccuracyofpitchtypeclassificationusingI3DforvideoinputsandInceptionV3forpose
+heatmaps.
+Method Accuracy
+Random 17.0%
+I3D 25.8%
+I3D+LSTM 18.5%
+I3D+sub-events 34.5%
+Pose 28.4%
+Pose+LSTM 27.6%
+Pose+sub-events 36.4%
+convolutionappeartooverfit. Convolutionalsub-events,especiallywhencombinedwithsuper-event
+representation,significantlyenhanceperformance,particularlyforframe-basedfeatures.
+Table8: Performanceoncontinuousvideosformulti-labelactivityclassification(per-framemAP).
+Method RGB Flow Two-stream
+Random 13.4 13.4 13.4
+I3D 33.8 35.1 34.2
+I3D+max-pooling 34.9 36.4 36.8
+I3D+pyramid 36.8 37.5 39.7
+I3D+LSTM 36.2 37.3 39.4
+I3D+temporalconv 35.2 38.1 39.2
+I3D+sub-events 35.5 37.5 38.5
+I3D+super-events 38.7 38.6 39.1
+I3D+sub+super-events 38.2 39.4 40.4
+InceptionV3 31.2 31.8 31.9
+InceptionV3+max-pooling 31.8 34.1 35.2
+InceptionV3+pyramid 32.2 35.1 36.8
+InceptionV3+LSTM 32.1 33.5 34.1
+InceptionV3+temporalconv 28.4 34.4 33.4
+InceptionV3+sub-events 32.1 35.8 37.3
+InceptionV3+super-events 31.5 36.2 39.6
+InceptionV3+sub+super-events 34.2 40.2 40.9
+7 Conclusion
+ThispaperintroducesMLB-YouTube,anovelandchallengingdatasetdesignedfordetailedactivity
+recognitioninvideos. Weconductacomparativeanalysisofvariousrecognitiontechniquesthat
+employtemporalfeaturepoolingforbothsegmentedandcontinuousvideos. Ourfindingsrevealthat
+learningsub-eventstopinpointtemporalregionsofinterestsignificantlyenhancesperformancein
+segmentedvideoclassification. Inthecontextofactivitydetectionincontinuousvideos,weestablish
+thatincorporatingconvolutionalsub-eventswithasuper-eventrepresentation,creatingathree-level
+activityhierarchy,yieldsthemostfavorableoutcomes.
+7
