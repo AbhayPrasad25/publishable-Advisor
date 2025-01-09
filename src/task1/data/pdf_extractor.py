@@ -46,7 +46,7 @@ class PdfExtractor:
             text_blocks = []
             for page in doc:
                 # Getting the page content as a dictionary
-                blocks = page.get_text("dict"["blocks"])
+                blocks = page.get_text("dict")["blocks"]
                 # Process and adding blocks to the colleection
                 text_blocks.extend(self.process_blocks(blocks))
 
@@ -72,3 +72,96 @@ class PdfExtractor:
             'page_count': len(doc) #Number of pages
         }
         return metadata
+    
+    # Processing the text blocks
+    def process_blocks(self, blocks: List) -> List[Dict]:
+        procesed_blocks = []
+        for block in blocks:
+            if block.get('type') == 0: # Chcecking wether it is a text block
+                for line in block.get('Lines', []):
+                    text_segments = []
+                    for span in line.get('spans', []):
+
+                        # Extracting the text and its formatting
+                        text_segments.append({
+                            'text': span.get('text', ''),
+                            'font': span.get('font', ''),
+                            'size': span.get('size', 0),
+                            'flags': span.get('flags', 0)
+                        })
+                    
+                    procesed_blocks.append(text_segments)
+        return procesed_blocks
+    
+
+    
+    # Organizing the content into a structured format
+    def orgainze_content(self, text_blocks: List) -> Dict:
+        structure = {
+            'sections' : [],
+            'current_section': None
+        }
+
+        for block in text_blocks:
+            # Checking if the block is a heading
+            if self.is_heading(block):
+                # If current section add it to the section list
+                if structure['current_section']:
+                    structure['sections'].append(structure['current_section'])
+
+                # New Section
+                structure['current_section'] = {
+                    'heading': self.get_text(block),
+                    'content': [],
+                    'subsection': []
+                }
+
+            elif structure['current_section']:
+                structure['current_section']['content'].append(self.get_text(block))
+
+        # Adding the last section
+        if structure['current_section']:
+            structure['sections'].append(structure['current_section'])
+        
+        return structure 
+    
+    # Checking the block is a heading or not 
+    def is_heading(self, block: List[Dict]) -> bool:
+        # Using the text formatting to check if the block is a heading
+
+        if not block:
+            return False
+        
+        # Calcualting the average font size and checking for bold formatting
+        avgerage_font_size = sum(span['size'] for span in block) / len(block)
+        is_bold = any(span['flags'] & 1 for span in block)
+
+        return avgerage_font_size > 12 or is_bold
+    
+    # Extracting the text from the block
+    def get_text(self, block: List[Dict]) -> str:
+        return ' '.join(span['text'] for span in block)
+    
+    # Batch Processing of the pdf files
+    def batch_process(self, input_directory: str, output_directory: str) -> None:
+        # Creating the output directory if it does not exist
+        Path(output_directory).mkdir(parents=True, exist_ok=True)
+
+        # Processing each pdf file in the input directory
+        for filename in os.listdir(input_directory):
+            if filename.lower().endswith('.pdf'):
+                pdf_path = os.path.join(input_directory, filename)
+                output_path = os.path.join(output_directory, f"{filename[:-4]}.json")
+
+                try:
+                    structure = self.extract_structure(pdf_path)
+                    self.save_structure(structure, output_path)
+                except Exception as e:
+                    self.logger.error(f"Failed to process {filename}: {str(e)}")
+
+    # Saving the structure to a json file
+    def save_structure(self, structure: Dict, output_path: str) -> None:
+        
+        import json
+        with open(output_path, 'w', encoding = 'utf-8') as f:
+            json.dump(structure, f, ensure_ascii= False, indent =  2)
