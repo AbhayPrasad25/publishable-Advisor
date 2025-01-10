@@ -113,8 +113,12 @@ class PdfExtractor:
                 structure['current_section'] = {
                     'heading': self.get_text(block),
                     'content': [],
-                    'subsection': []
+                    'subsections': []
                 }
+
+            elif self.is_subheading(block):
+                if structure['current_section']:
+                    structure['current_section']['subsections'].append(self.get_text(block))
 
             elif structure['current_section']:
                 structure['current_section']['content'].append(self.get_text(block))
@@ -137,6 +141,14 @@ class PdfExtractor:
         is_bold = any(span.get('flags', 0) & 2 for span in block)
 
         return avgerage_font_size > 12 or is_bold
+    
+    # Checking the block is a subheading or not
+    def is_subheading(self, block: List[Dict]) -> bool:
+        text = self.get_text(block)
+
+        subsection_pattern = r'^\d+(\.\d+)*[A-Za-z]*\.$'
+
+        return bool(re.match(subsection_pattern, text.strip()))
     
     # Extracting the text from the block
     def get_text(self, block: List[Dict]) -> str:
