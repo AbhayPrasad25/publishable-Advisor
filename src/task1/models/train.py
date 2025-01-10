@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 
-from src.task1.data.pdf_extractor import PDFExtractor
+from src.task1.data.pdf_extractor import PdfExtractor
 from src.task1.data.preprocessing import Preprocessor
 from src.task1.data.feature_extraction import FeatureExtractor
 from src.task1.models.baseline_model import BaselineModel
@@ -46,7 +46,7 @@ def main():
     try:
         # Step 1: Extract text from PDFs
         logger.info("Starting PDF text extraction...")
-        extractor = PDFExtractor(log_path=str(Path(args.log_dir) / "extractor.log"))
+        extractor = PdfExtractor(log_path=str(Path(args.log_dir) / "extractor.log"))
         
         # Process labeled data
         labeled_output_dir = Path(args.processed_dir) / "labeled"
