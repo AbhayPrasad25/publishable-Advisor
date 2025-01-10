@@ -8,9 +8,9 @@ import re
 class PdfExtractor:
     def __init__(self, log_path: Optional[str] = None):
         # Setting up a logger with a optional log file path
-        self.logger = self.setup_logger(log_path)
+        self.logger = self.setup_logger(log_path)  # Rename to match method definition
 
-    def setup_logging(self, log_path: Optional[str]) -> logging.logger:
+    def setup_logger(self, log_path: Optional[str]) -> logging.Logger:
         # Creating a logger named pdfExtractor
         logger = logging.getLogger('pdfExtractor')
         logger.setLevel(logging.INFO)  # Setting the log level to INFO
@@ -35,7 +35,7 @@ class PdfExtractor:
 
             #Inializing the dictionary to store the stucture of the pdf
             structure = {
-                'tile': '',
+                'title': '',
                 'abstract': '',
                 'sections': [],
                 'references': [],
@@ -67,8 +67,8 @@ class PdfExtractor:
         metadata = {
             'title': doc.metadata.get('title', ''),
             'author': doc.metadata.get('author', ''),
-            'creation_date': doc.metadata.get('creation_date', ''),
-            'modification_date': doc.metadata.get('modification_date', ''),
+            'creation_date': doc.metadata.get('creationDate', ''),
+            'modification_date': doc.metadata.get('modDate', ''),
             'page_count': len(doc) #Number of pages
         }
         return metadata
@@ -78,7 +78,7 @@ class PdfExtractor:
         procesed_blocks = []
         for block in blocks:
             if block.get('type') == 0: # Chcecking wether it is a text block
-                for line in block.get('Lines', []):
+                for line in block.get('lines', []):
                     text_segments = []
                     for span in line.get('spans', []):
 
@@ -129,12 +129,12 @@ class PdfExtractor:
     def is_heading(self, block: List[Dict]) -> bool:
         # Using the text formatting to check if the block is a heading
 
-        if not block:
+        if not block or not isinstance(block, list):
             return False
         
         # Calcualting the average font size and checking for bold formatting
         avgerage_font_size = sum(span['size'] for span in block) / len(block)
-        is_bold = any(span['flags'] & 1 for span in block)
+        is_bold = any(span.get('flags', 0) & 2 for span in block)
 
         return avgerage_font_size > 12 or is_bold
     
