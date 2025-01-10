@@ -1,7 +1,7 @@
 import re
 from typing import List, Dict, Union, Optional
 import logging
-from pathlib import path
+from pathlib import Path
 import json
 import spacy
 from sklearn.preprocessing import StandardScaler
@@ -37,7 +37,7 @@ class Preprocessor:
     def clean_text(self, text:str) ->str:
         text = text.lower()
         # Removing special charcacters
-        text = re.sub(r^'[a-zA-Z\s)]', '', text)
+        text = re.sub(r'[^a-zA-Z\s]', '', text)
         text = " ".join(text.split())
         return text
     
